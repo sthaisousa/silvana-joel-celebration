@@ -30,7 +30,9 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex items-center justify-center gap-2 text-[10px] tracking-luxe uppercase text-background/50">
-          Feito com <Heart className="h-3 w-3 text-gradient-gold" fill="currentColor" /> para nossos convidados
+          <span>Feito com</span>
+          <Heart className="h-3 w-3 text-gradient-gold" fill="currentColor" />
+          <span>para nossos convidados</span>
         </div>
       </div>
     </footer>

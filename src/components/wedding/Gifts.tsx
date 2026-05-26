@@ -48,7 +48,8 @@ export function Gifts() {
                 </div>
               </div>
               <p className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <QrCode className="h-4 w-4" /> silvanaejoel@pix.com
+                <QrCode className="h-4 w-4" />
+                <span>silvanaejoel@pix.com</span>
               </p>
             </div>
           </Reveal>
