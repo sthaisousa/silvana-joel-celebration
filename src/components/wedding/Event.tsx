@@ -6,7 +6,7 @@ const ceremony = {
   title: "Cerimônia",
   date: "12 de Dezembro, 2026",
   time: "16h30",
-  place: "Capela San Marco · Campo Grande, MS",
+  place: "Local X · Campo Grande, MS",
   map: "https://maps.google.com/?q=Capela+San+Marco+Campo+Grande+MS",
   embed:
     "https://www.google.com/maps?q=Capela+San+Marco+Campo+Grande+MS&output=embed",
