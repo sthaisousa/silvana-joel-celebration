@@ -4,7 +4,7 @@ import { Countdown } from "./Countdown";
 
 export function Hero() {
   return (
-    <section id="inicio" className="relative h-[100svh] min-h-[640px] w-full overflow-hidden">
+    <section id="inicio" className="relative min-h-[100svh] w-full overflow-hidden py-24">
       <motion.img
         src={hero}
         alt="Silvana e Joel em um pomar ao pôr do sol"
@@ -17,7 +17,7 @@ export function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-hero" />
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-background px-[30px]">
+      <div className="relative z-10 flex min-h-[calc(100svh-12rem)] flex-col items-center justify-center text-center text-background px-[30px]">
         <motion.span
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
