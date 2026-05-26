@@ -79,9 +79,6 @@ export function Gifts() {
                   />
                   <div className="flex-1">
                     <h4 className="font-serif text-lg leading-snug">{g.title}</h4>
-                    <p className="text-[11px] tracking-refined uppercase text-muted-foreground mt-1">
-                      Presente simbólico
-                    </p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-serif text-lg text-gradient-gold">{g.price}</p>
