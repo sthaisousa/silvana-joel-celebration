@@ -75,11 +75,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Silvana & Joel — 12.12.2026 • Campo Grande, MS" },
       { name: "description", content: "Celebrando o amor, a eternidade e o início da nossa nova história. Casamento de Silvana & Joel em Campo Grande, MS." },
       { name: "author", content: "Silvana & Joel" },
-      { property: "og:title", content: "Silvana & Joel — 12 de dezembro de 2026" },
-      { property: "og:description", content: "Celebrando o amor, a eternidade e o início da nossa nova história." },
+      { property: "og:title", content: "Silvana & Joel — 12.12.2026 • Campo Grande, MS" },
+      { property: "og:description", content: "Celebrando o amor, a eternidade e o início da nossa nova história. Casamento de Silvana & Joel em Campo Grande, MS." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Silvana & Joel — 12.12.2026 • Campo Grande, MS" },
+      { name: "twitter:description", content: "Celebrando o amor, a eternidade e o início da nossa nova história. Casamento de Silvana & Joel em Campo Grande, MS." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/644cf8ae-0a8c-4cfa-812f-bc6914438b1f/id-preview-f55682b2--d378bb8c-4d66-489b-807f-1a2d4c12aa17.lovable.app-1779814225494.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/644cf8ae-0a8c-4cfa-812f-bc6914438b1f/id-preview-f55682b2--d378bb8c-4d66-489b-807f-1a2d4c12aa17.lovable.app-1779814225494.png" },
     ],
     links: [
       {
