@@ -32,19 +32,19 @@ export function Gifts() {
               <h3 className="mt-4 font-serif text-3xl">Contribua de onde estiver</h3>
               <div className="mt-8 inline-flex items-center justify-center bg-background p-6 shadow-elegant">
                 <div className="grid h-44 w-44 grid-cols-8 grid-rows-8 gap-[3px] p-2 bg-background">
-                  {Array.from({ length: 64 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className="block"
-                      style={{
-                        background:
-                          [0, 1, 6, 7, 8, 15, 48, 49, 54, 55, 56, 63].includes(i) ||
-                          Math.random() > 0.55
-                            ? "var(--ink)"
-                            : "transparent",
-                      }}
-                    />
-                  ))}
+                  {Array.from({ length: 64 }).map((_, i) => {
+                    const corners = [0, 1, 6, 7, 8, 15, 48, 49, 54, 55, 56, 63];
+                    // Deterministic pseudo-random pattern (stable across SSR/CSR)
+                    const filled =
+                      corners.includes(i) || ((i * 2654435761) >>> 0) % 100 > 55;
+                    return (
+                      <span
+                        key={i}
+                        className="block"
+                        style={{ background: filled ? "var(--ink)" : "transparent" }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
               <p className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
