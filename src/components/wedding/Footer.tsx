@@ -1,4 +1,4 @@
-import { Instagram, Mail, Heart } from "lucide-react";
+import { Camera, Mail, Heart } from "lucide-react";
 
 export function Footer() {
   return (
@@ -18,7 +18,7 @@ export function Footer() {
         <p className="mt-3 text-[11px] tracking-luxe uppercase text-background/60">Com amor</p>
 
         <div className="mt-12 flex items-center justify-center gap-6">
-          {[Instagram, Mail].map((Icon, i) => (
+          {[Camera, Mail].map((Icon, i) => (
             <a
               key={i}
               href="#"
