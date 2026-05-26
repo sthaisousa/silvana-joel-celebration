@@ -64,7 +64,8 @@ export function Event() {
                   rel="noreferrer"
                   className="mt-8 inline-flex items-center gap-2 border-b border-foreground/30 pb-1 text-[11px] tracking-luxe uppercase transition-all duration-500 hover:border-primary hover:text-primary"
                 >
-                  <MapPin className="h-3.5 w-3.5" /> Ver no mapa
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span>Ver no mapa</span>
                 </a>
               </article>
             </Reveal>
