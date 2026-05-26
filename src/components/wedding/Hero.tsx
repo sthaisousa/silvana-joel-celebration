@@ -17,7 +17,7 @@ export function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-hero" />
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-background">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-background px-[30px]">
         <motion.span
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
