@@ -14,17 +14,18 @@ function diff() {
 }
 
 export function Countdown({ light = false }: { light?: boolean }) {
-  const [t, setT] = useState(diff);
+  const [t, setT] = useState<ReturnType<typeof diff> | null>(null);
   useEffect(() => {
+    setT(diff());
     const i = setInterval(() => setT(diff()), 1000);
     return () => clearInterval(i);
   }, []);
 
   const items = [
-    { v: t.days, l: "Dias" },
-    { v: t.hours, l: "Horas" },
-    { v: t.minutes, l: "Min" },
-    { v: t.seconds, l: "Seg" },
+    { v: t?.days ?? 0, l: "Dias" },
+    { v: t?.hours ?? 0, l: "Horas" },
+    { v: t?.minutes ?? 0, l: "Min" },
+    { v: t?.seconds ?? 0, l: "Seg" },
   ];
 
   return (
@@ -33,7 +34,7 @@ export function Countdown({ light = false }: { light?: boolean }) {
         <div key={it.l} className="flex items-center gap-5 sm:gap-10">
           <div className="text-center">
             <div className="font-serif text-3xl sm:text-5xl tabular-nums">
-              {String(it.v).padStart(2, "0")}
+              {t ? String(it.v).padStart(2, "0") : "--"}
             </div>
             <div className="mt-2 text-[10px] tracking-luxe uppercase opacity-80">{it.l}</div>
           </div>
