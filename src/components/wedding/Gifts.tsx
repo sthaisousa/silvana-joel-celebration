@@ -1,11 +1,19 @@
 import { Reveal, SectionLabel } from "./Reveal";
-import { Plane, Utensils, BedDouble, Sparkles, QrCode } from "lucide-react";
+import { QrCode } from "lucide-react";
+import giftBusMsSp from "@/assets/gift-bus-ms-sp.jpg";
+import giftBusSpMs from "@/assets/gift-bus-sp-ms.jpg";
+import giftPanelas from "@/assets/gift-panelas.jpg";
+import giftPapel from "@/assets/gift-papel.jpg";
+import giftPotes from "@/assets/gift-potes.jpg";
+import giftCortina from "@/assets/gift-cortina.jpg";
 
 const gifts = [
-  { icon: Utensils, title: "Jantar romântico", price: "R$ 350" },
-  { icon: Plane, title: "Passeio especial", price: "R$ 700" },
-  { icon: BedDouble, title: "Hospedagem", price: "R$ 1.200" },
-  { icon: Sparkles, title: "Experiência inesquecível", price: "R$ 1.800" },
+  { image: giftBusMsSp, title: "Passagem de ônibus de MS para SP", price: "R$ 250" },
+  { image: giftBusSpMs, title: "Passagem de volta de SP para MS", price: "R$ 250" },
+  { image: giftPanelas, title: "Contribua com nosso futuro (e com o jogo de panelas)", price: "R$ 500" },
+  { image: giftPapel, title: "Auxílio luxo: papel higiênico folha dupla", price: "R$ 80" },
+  { image: giftPotes, title: "Compra de 47 potes iguais pra não perder tampa", price: "R$ 150" },
+  { image: giftCortina, title: "Cortina pra gente se esconder atrás e fingir que não tem ninguém em casa", price: "R$ 300" },
 ];
 
 export function Gifts() {
@@ -61,16 +69,21 @@ export function Gifts() {
                   key={g.title}
                   className="group flex items-center gap-5 bg-background border border-border p-6 transition-all duration-700 hover:shadow-elegant hover:-translate-y-0.5"
                 >
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
-                    <g.icon className="h-5 w-5" />
-                  </span>
+                  <img
+                    src={g.image}
+                    alt={g.title}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    className="h-20 w-20 shrink-0 rounded-md object-cover shadow-soft"
+                  />
                   <div className="flex-1">
-                    <h4 className="font-serif text-xl">{g.title}</h4>
+                    <h4 className="font-serif text-lg leading-snug">{g.title}</h4>
                     <p className="text-[11px] tracking-refined uppercase text-muted-foreground mt-1">
                       Presente simbólico
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="font-serif text-lg text-gradient-gold">{g.price}</p>
                     <button className="mt-1 text-[10px] tracking-luxe uppercase text-foreground/60 hover:text-foreground transition-colors">
                       Presentear
