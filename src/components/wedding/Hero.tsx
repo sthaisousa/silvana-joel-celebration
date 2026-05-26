@@ -97,7 +97,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 3, duration: 1 }}
-        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-background/80"
+        className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-background/80"
         aria-label="Rolar para baixo"
       >
         <div className="flex flex-col items-center gap-3">
