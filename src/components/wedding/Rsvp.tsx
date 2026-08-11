@@ -71,12 +71,14 @@ export function Rsvp() {
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant mx-auto block"
-                  >
-                    Confirmar Presença
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      className="group inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant"
+                    >
+                      Confirmar Presença
+                    </button>
+                  </div>
                 </motion.form>
               ) : (
                 <motion.div

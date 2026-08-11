@@ -84,13 +84,15 @@ export function Mural() {
                       className="input-mural resize-none"
                     />
                   </MuralField>
-                  <button
-                    type="submit"
-                    disabled={mutation.isPending}
-                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant disabled:opacity-60 mx-auto block"
-                  >
-                    {mutation.isPending ? "Enviando…" : "Enviar mensagem"}
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      disabled={mutation.isPending}
+                      className="group inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant disabled:opacity-60"
+                    >
+                      {mutation.isPending ? "Enviando…" : "Enviar mensagem"}
+                    </button>
+                  </div>
                 </motion.form>
               ) : (
                 <motion.div
