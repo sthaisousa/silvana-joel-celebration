@@ -6,15 +6,11 @@ import { Reveal, SectionLabel } from "./Reveal";
 const items = [
   {
     q: "Qual o dress code?",
-    a: "Black tie. Sugerimos tons sóbrios e atemporais — preto, off-white, champagne, nude e azul-marinho. Nada de branco para as convidadas, por favor.",
-  },
-  {
-    q: "Posso levar crianças?",
-    a: "Por opção dos noivos, a celebração será exclusiva para adultos. Caso necessite de baby-sitter no hotel, podemos indicar profissionais de confiança.",
+    a: "Esporte fino. Sugerimos tons sóbrios e atemporais — preto, off-white, champagne, nude e azul-marinho. Nada de branco para as convidadas, por favor.",
   },
   {
     q: "Quais os horários?",
-    a: "Cerimônia às 18h00 e recepção a partir das 19h00. Sugerimos chegar 30 minutos antes da cerimônia.",
+    a: "Cerimônia às 18h00 e recepção a partir das 17h30. Sugerimos chegar 30 minutos antes da cerimônia.",
   },
   {
     q: "Sugestões de hospedagem?",
