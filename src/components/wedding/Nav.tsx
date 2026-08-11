@@ -35,9 +35,10 @@ export function Nav() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
         <a
           href="#inicio"
-          className={`font-serif text-xl tracking-refined transition-colors ${
+          className={`text-2xl tracking-refined transition-colors ${
             scrolled ? "text-foreground" : "text-background"
           }`}
+          style={{ fontFamily: "'Great Vibes', cursive" }}
         >
           S <span className="text-gradient-gold">&amp;</span> J
         </a>

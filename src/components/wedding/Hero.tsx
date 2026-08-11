@@ -32,7 +32,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
           className="mt-6 text-[clamp(3.5rem,12vw,9rem)] leading-[0.95] text-balance"
-          style={{ fontFamily: "'Brittany Signature', cursive" }}
+          style={{ fontFamily: "'Great Vibes', cursive" }}
         >
           Silvana
           <span className="block italic font-light text-background/95 text-[clamp(2rem,7vw,5rem)] my-1 sm:my-2">
