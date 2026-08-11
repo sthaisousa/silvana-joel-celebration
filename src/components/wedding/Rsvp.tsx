@@ -71,14 +71,6 @@ export function Rsvp() {
                     </div>
                   </div>
 
-                  <Field label="Uma mensagem aos noivos">
-                    <textarea
-                      rows={4}
-                      placeholder="Deixe seu carinho em palavras"
-                      className="input-luxe resize-none"
-                    />
-                  </Field>
-
                   <button
                     type="submit"
                     className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant"

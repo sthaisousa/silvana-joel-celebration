@@ -7,6 +7,7 @@ import { Rsvp } from "@/components/wedding/Rsvp";
 import { Gallery } from "@/components/wedding/Gallery";
 import { Gifts } from "@/components/wedding/Gifts";
 import { Travel } from "@/components/wedding/Travel";
+import { Mural } from "@/components/wedding/Mural";
 import { Faq } from "@/components/wedding/Faq";
 import { Footer } from "@/components/wedding/Footer";
 
@@ -22,6 +23,7 @@ function Index() {
       <Story />
       <Event />
       <Rsvp />
+      <Mural />
       <Gallery />
       <Gifts />
       <Travel />
