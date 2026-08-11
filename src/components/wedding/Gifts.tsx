@@ -49,7 +49,7 @@ export function Gifts() {
                     className="h-20 w-20 shrink-0 rounded-md object-cover shadow-soft"
                   />
                   <div className="flex-1">
-                    <h4 className="text-lg leading-snug">{g.title}</h4>
+                    <h4 className="text-lg leading-snug" style={{ fontFamily: "Arial, sans-serif" }}>{g.title}</h4>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-serif text-lg text-gradient-gold">{g.price}</p>
