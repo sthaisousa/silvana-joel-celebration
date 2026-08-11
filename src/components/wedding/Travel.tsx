@@ -1,5 +1,5 @@
 import { Reveal, SectionLabel } from "./Reveal";
-import { Hotel, Car, Plane, Compass } from "lucide-react";
+import { Hotel, Plane, Compass } from "lucide-react";
 
 const items = [
   {
@@ -17,17 +17,7 @@ const items = [
     title: "Aeroporto",
     items: [
       "Aeroporto Internacional de Campo Grande (CGR)",
-      "20 minutos do hotel recomendado",
-      "Transfer privativo sob consulta",
-    ],
-  },
-  {
-    icon: Car,
-    title: "Transporte",
-    items: [
-      "Aplicativos disponíveis 24h",
-      "Locação de veículos no aeroporto",
-      "Shuttle dedicado dos hotéis ao evento",
+      "20 minutos do local do evento",
     ],
   },
   {
@@ -57,7 +47,7 @@ export function Travel() {
           </div>
         </Reveal>
 
-        <div className="mt-20 grid gap-px bg-border md:grid-cols-2">
+        <div className="mt-20 grid gap-px bg-border md:grid-cols-3">
           {items.map((it, i) => (
             <Reveal key={it.title} delay={i * 0.08}>
               <div className="h-full bg-background p-10">

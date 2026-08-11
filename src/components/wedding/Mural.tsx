@@ -87,7 +87,7 @@ export function Mural() {
                   <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant disabled:opacity-60"
+                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant disabled:opacity-60 mx-auto block"
                   >
                     {mutation.isPending ? "Enviando…" : "Enviar mensagem"}
                   </button>

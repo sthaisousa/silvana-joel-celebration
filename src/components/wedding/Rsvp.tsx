@@ -73,7 +73,7 @@ export function Rsvp() {
 
                   <button
                     type="submit"
-                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant"
+                    className="group w-full sm:w-auto inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant mx-auto block"
                   >
                     Confirmar Presença
                   </button>
