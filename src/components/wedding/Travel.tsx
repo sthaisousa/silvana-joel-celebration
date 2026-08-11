@@ -6,9 +6,10 @@ const items = [
     icon: Hotel,
     title: "Hospedagem",
     items: [
-      "Bristol Exceler Plaza Hotel · 5 min do evento",
-      "Mato Grosso Palace · 8 min do evento",
-      "Deville Prime Campo Grande · 12 min do evento",
+      "Ibis Budget Campo Grande · 10 minutos",
+      "Indaiá Park Hotel · 15 minutos",
+      "Cerrado Comfort Hotel · 14 minutos",
+      "Bristol Exceler Plaza Hotel · 14 minutos",
     ],
   },
   {

@@ -117,10 +117,9 @@ export function Event() {
         </div>
 
         <Reveal delay={0.2}>
-          <div className="mt-20 grid gap-8 md:grid-cols-3 text-center">
+          <div className="mt-20 grid gap-8 md:grid-cols-2 text-center">
             {[
               { t: "Dress Code", d: "Black tie · tons sóbrios e atemporais" },
-              { t: "Estacionamento", d: "Valet exclusivo gratuito para convidados" },
               { t: "Chegada", d: "Sugerimos chegar 30 minutos antes da cerimônia" },
             ].map((x) => (
               <div key={x.t} className="border-t border-border pt-6">

@@ -71,25 +71,6 @@ export function Rsvp() {
                     </div>
                   </div>
 
-                  <div className="grid gap-8 sm:grid-cols-2">
-                    <Field label="Acompanhantes">
-                      <input
-                        type="number"
-                        min={0}
-                        max={5}
-                        defaultValue={0}
-                        className="input-luxe"
-                      />
-                    </Field>
-                    <Field label="Restrições alimentares">
-                      <input
-                        type="text"
-                        placeholder="Nenhuma / Vegetariano / Sem glúten…"
-                        className="input-luxe"
-                      />
-                    </Field>
-                  </div>
-
                   <Field label="Uma mensagem aos noivos">
                     <textarea
                       rows={4}

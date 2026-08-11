@@ -13,20 +13,12 @@ const items = [
     a: "Por opção dos noivos, a celebração será exclusiva para adultos. Caso necessite de baby-sitter no hotel, podemos indicar profissionais de confiança.",
   },
   {
-    q: "Haverá estacionamento?",
-    a: "Sim. Disponibilizaremos serviço de valet gratuito para todos os convidados, com manobristas exclusivos durante toda a noite.",
-  },
-  {
     q: "Quais os horários?",
     a: "Cerimônia às 16h30, recepção a partir das 19h00 e after party a partir da meia-noite. Sugerimos chegar 30 minutos antes da cerimônia.",
   },
   {
-    q: "Posso levar um acompanhante?",
-    a: "Cada convite especifica o número de acompanhantes. Por favor, indique o total no formulário de RSVP até 30 de outubro de 2026.",
-  },
-  {
     q: "Sugestões de hospedagem?",
-    a: "Reservamos tarifas especiais nos hotéis Bristol Exceler Plaza, Mato Grosso Palace e Deville Prime. Mencione o casamento Silvana & Joel na reserva.",
+    a: "Sugerimos os hotéis Ibis Budget Campo Grande (10 min), Indaiá Park Hotel (15 min), Cerrado Comfort Hotel (14 min) e Bristol Exceler Plaza Hotel (14 min).",
   },
 ];
 
