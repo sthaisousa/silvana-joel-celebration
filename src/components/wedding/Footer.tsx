@@ -12,7 +12,7 @@ export function Footer() {
           “E que o amor que hoje nos une seja, para sempre, a luz mais bonita das nossas vidas.”
         </p>
         <span className="mt-10 inline-block divider-gold" />
-        <h3 className="mt-8 font-serif text-4xl sm:text-5xl">
+        <h3 className="mt-8 text-4xl sm:text-5xl" style={{ fontFamily: "'Great Vibes', cursive" }}>
           Silvana <span className="text-gradient-gold">&amp;</span> Joel
         </h3>
         <p className="mt-3 text-[11px] tracking-luxe uppercase text-background/60">Com amor</p>
