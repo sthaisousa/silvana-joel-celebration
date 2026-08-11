@@ -14,7 +14,7 @@ const items = [
   },
   {
     q: "Quais os horários?",
-    a: "Cerimônia às 16h30, recepção a partir das 19h00 e after party a partir da meia-noite. Sugerimos chegar 30 minutos antes da cerimônia.",
+    a: "Cerimônia às 18h00 e recepção a partir das 19h00. Sugerimos chegar 30 minutos antes da cerimônia.",
   },
   {
     q: "Sugestões de hospedagem?",

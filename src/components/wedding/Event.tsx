@@ -5,11 +5,11 @@ const ceremony = {
   icon: Church,
   title: "Cerimônia",
   date: "12 de Dezembro, 2026",
-  time: "16h30",
-  place: "Local X · Campo Grande, MS",
-  map: "https://maps.google.com/?q=Capela+San+Marco+Campo+Grande+MS",
+  time: "18h00",
+  place: "Ernesto Café Bar · R. Manoel Inácio de Souza, 507 A - Centro, Campo Grande - MS",
+  map: "https://maps.google.com/?q=R.+Manoel+Inácio+de+Souza,+507+A+Campo+Grande+MS",
   embed:
-    "https://www.google.com/maps?q=Capela+San+Marco+Campo+Grande+MS&output=embed",
+    "https://www.google.com/maps?q=R.+Manoel+Inácio+de+Souza,+507+A+Campo+Grande+MS&output=embed",
 };
 
 const secondaryEvents = [
@@ -18,16 +18,8 @@ const secondaryEvents = [
     title: "Recepção",
     date: "12 de Dezembro, 2026",
     time: "19h00",
-    place: "Villa Toscana Eventos · Campo Grande, MS",
-    map: "https://maps.google.com/?q=Villa+Toscana+Campo+Grande+MS",
-  },
-  {
-    icon: Sparkles,
-    title: "After Party",
-    date: "12 de Dezembro, 2026",
-    time: "00h00",
-    place: "Lounge Privê · Villa Toscana",
-    map: "https://maps.google.com/?q=Villa+Toscana+Campo+Grande+MS",
+    place: "Ernesto Café Bar · Campo Grande, MS",
+    map: "https://maps.google.com/?q=R.+Manoel+Inácio+de+Souza,+507+A+Campo+Grande+MS",
   },
 ];
 
