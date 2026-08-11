@@ -59,10 +59,10 @@ export function Rsvp() {
                           type="button"
                           key={v}
                           onClick={() => setAttending(v)}
-                          className={`border py-4 text-[11px] tracking-luxe uppercase transition-all duration-500 ${
+                          className={`border py-2.5 text-[10px] tracking-luxe uppercase transition-all duration-500 ${
                             attending === v
                               ? "bg-foreground text-background border-foreground"
-                              : "border-border text-foreground/70 hover:border-foreground/50"
+                              : "border-border text-foreground/50 hover:border-foreground/40"
                           }`}
                         >
                           {v === "sim" ? "Sim, estarei lá" : "Não poderei ir"}
@@ -74,7 +74,7 @@ export function Rsvp() {
                   <div className="flex justify-center">
                     <button
                       type="submit"
-                      className="group inline-flex items-center justify-center bg-gradient-gold text-background px-12 py-4 text-[11px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant"
+                      className="group inline-flex items-center justify-center bg-gradient-gold text-background px-16 py-5 text-[12px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant shadow-soft font-medium"
                     >
                       Confirmar Presença
                     </button>
