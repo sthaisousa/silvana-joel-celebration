@@ -6,7 +6,7 @@ import { Reveal, SectionLabel } from "./Reveal";
 const items = [
   {
     q: "Qual o dress code?",
-    a: "Esporte fino. Sugerimos tons sóbrios e atemporais — preto, off-white, champagne, nude e azul-marinho. Nada de branco para as convidadas, por favor.",
+    a: "Esporte Fino.",
   },
   {
     q: "Quais os horários?",
