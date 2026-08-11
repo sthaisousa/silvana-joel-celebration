@@ -59,7 +59,7 @@ export function Hero() {
           transition={{ delay: 1.9, duration: 1.2 }}
           className="mt-8 max-w-xl font-serif italic text-lg sm:text-xl text-background/95 text-balance"
         >
-          “Celebrando o amor, a eternidade e o início da nossa nova história.”
+          "Portanto deixará o homem a seu pai e a sua mãe, e unir-se-á a sua mulher, e serão uma só carne." — Gênesis 2.24
         </motion.p>
 
         <motion.div
