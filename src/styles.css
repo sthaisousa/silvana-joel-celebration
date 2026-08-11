@@ -182,7 +182,7 @@
   .font-sans { font-family: var(--font-sans); }
   .text-balance { text-wrap: balance; }
 
-  .tracking-luxe { letter-spacing: 0.32em; }
+  .tracking-luxe { letter-spacing: 0.22em; }
   .tracking-refined { letter-spacing: 0.18em; }
 
   .bg-gradient-hero { background: var(--gradient-hero); }
