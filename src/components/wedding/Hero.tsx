@@ -57,7 +57,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.9, duration: 1.2 }}
-          className="mt-8 max-w-xl font-serif italic text-lg sm:text-xl text-background/95 text-balance"
+          className="mt-8 max-w-xl font-serif italic text-sm sm:text-base text-background/95 text-balance"
         >
           "Portanto deixará o homem a seu pai e a sua mãe, e unir-se-á a sua mulher, e serão uma só carne." — Gênesis 2.24
         </motion.p>
