@@ -36,5 +36,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["bun", "node_modules/.bin/wrangler", "dev", "dist/server/index.js", "--port", "5000", "--no-bundle"]
+run = ["bash", "start-prod.sh"]
 build = ["bun", "run", "build"]
