@@ -30,7 +30,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 text-[10px] tracking-luxe uppercase text-background/50">
-          Feito com amor
+          Feito com carinho para os nossos convidados
         </div>
       </div>
       <a

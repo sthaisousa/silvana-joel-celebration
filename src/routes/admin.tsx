@@ -67,18 +67,39 @@ const welcomeMessages = [
   "A gente vai ter que adicionar o Joel no nosso point de encontro lá da cafeteria, né?",
 ] as const;
 
+const LAST_WELCOME_MESSAGE_KEY = "wedding-admin-last-welcome-message";
+
+function drawWelcomeMessage(currentMessage?: string | null) {
+  const previousMessage =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem(LAST_WELCOME_MESSAGE_KEY)
+      : null;
+  const availableMessages = welcomeMessages.filter(
+    (message) => message !== currentMessage && message !== previousMessage,
+  );
+  const selectedMessage =
+    availableMessages[Math.floor(Math.random() * availableMessages.length)] ??
+    welcomeMessages[0];
+
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(LAST_WELCOME_MESSAGE_KEY, selectedMessage);
+  }
+
+  return selectedMessage;
+}
+
 function AdminPage() {
   const queryClient = useQueryClient();
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
+  const [welcomeDrawCount, setWelcomeDrawCount] = useState(0);
   const session = useQuery({ queryKey: ["admin-session"], queryFn: getAdminSession, retry: false });
   const authenticated = session.data?.authenticated === true;
 
   const login = useMutation({
     mutationFn: loginAdmin,
     onSuccess: () => {
-      setWelcomeMessage(
-        welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
-      );
+      setWelcomeMessage(drawWelcomeMessage());
+      setWelcomeDrawCount(0);
       queryClient.invalidateQueries({ queryKey: ["admin-session"] });
     },
   });
@@ -99,6 +120,11 @@ function AdminPage() {
       loggingOut={logout.isPending}
       welcomeMessage={welcomeMessage}
       onCloseWelcome={() => setWelcomeMessage(null)}
+      welcomeDrawCount={welcomeDrawCount}
+      onDrawWelcome={() => {
+        setWelcomeMessage((current) => drawWelcomeMessage(current));
+        setWelcomeDrawCount((count) => count + 1);
+      }}
     />
   );
 }
@@ -148,11 +174,15 @@ function AdminWorkspace({
   loggingOut,
   welcomeMessage,
   onCloseWelcome,
+  welcomeDrawCount,
+  onDrawWelcome,
 }: {
   onLogout: () => void;
   loggingOut: boolean;
   welcomeMessage: string | null;
   onCloseWelcome: () => void;
+  welcomeDrawCount: number;
+  onDrawWelcome: () => void;
 }) {
   const queryClient = useQueryClient();
   const data = useQuery({ queryKey: ["admin-data"], queryFn: getAdminData, retry: 1 });
@@ -286,7 +316,12 @@ function AdminWorkspace({
       </div>
       {editing && <GiftEditor gift={editing} onClose={() => setEditing(null)} onSave={submitGift} saving={save.isPending} />}
       {welcomeMessage && (
-        <WelcomeModal message={welcomeMessage} onClose={onCloseWelcome} />
+        <WelcomeModal
+          message={welcomeMessage}
+          onClose={onCloseWelcome}
+          drawCount={welcomeDrawCount}
+          onDraw={onDrawWelcome}
+        />
       )}
     </main>
   );
@@ -295,9 +330,13 @@ function AdminWorkspace({
 function WelcomeModal({
   message,
   onClose,
+  drawCount,
+  onDraw,
 }: {
   message: string;
   onClose: () => void;
+  drawCount: number;
+  onDraw: () => void;
 }) {
   return (
     <div
@@ -330,14 +369,29 @@ function WelcomeModal({
         >
           {message}
         </h2>
-        <button
-          type="button"
-          autoFocus
-          onClick={onClose}
-          className="mt-9 border border-[#26362d] px-7 py-3 font-sans text-[10px] uppercase tracking-[0.18em] text-[#26362d] transition-colors hover:bg-[#26362d] hover:text-[#f7f1e8]"
-        >
-          Continuar
-        </button>
+        {drawCount > 3 && (
+          <div className="relative mt-7 rounded-2xl rounded-bl-sm bg-[#eee4d2] px-5 py-4 text-left font-sans text-sm leading-relaxed text-[#596158]">
+            <span className="font-medium text-[#806338]">Thais diz:</span>{" "}
+            calma, é bagunça não, deixa eu respirar e pensar em recadinhos novos
+          </div>
+        )}
+        <div className="mt-9 flex flex-col-reverse justify-center gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={onDraw}
+            className="border border-[#b49159] px-5 py-3 font-sans text-[10px] uppercase tracking-[0.14em] text-[#806338] transition-colors hover:bg-[#eee4d2]"
+          >
+            Sortear nova mensagem
+          </button>
+          <button
+            type="button"
+            autoFocus
+            onClick={onClose}
+            className="border border-[#26362d] bg-[#26362d] px-7 py-3 font-sans text-[10px] uppercase tracking-[0.18em] text-[#f7f1e8] transition-colors hover:bg-[#415445]"
+          >
+            Continuar
+          </button>
+        </div>
       </section>
     </div>
   );
