@@ -66,17 +66,17 @@ export function Hero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.2, duration: 1 }}
-          className="mt-10 flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
+          className="mt-12 flex flex-col items-center gap-3 sm:mt-10 sm:flex-row sm:gap-4"
         >
           <a
             href="#rsvp"
-            className="group inline-flex items-center justify-center bg-background text-foreground px-9 py-4 text-[11px] tracking-luxe uppercase transition-all duration-500 hover:bg-gradient-gold hover:text-background shadow-soft"
+            className="group order-2 inline-flex items-center justify-center bg-background px-6 py-3 text-[10px] tracking-luxe uppercase text-foreground shadow-soft transition-all duration-500 hover:bg-gradient-gold hover:text-background sm:order-1 sm:px-9 sm:py-4 sm:text-[11px]"
           >
             Confirmar Presença
           </a>
           <a
             href="#evento"
-            className="inline-flex items-center justify-center border border-background/60 text-background px-9 py-4 text-[11px] tracking-luxe uppercase transition-all duration-500 hover:bg-background hover:text-foreground"
+            className="order-1 inline-flex items-center justify-center border border-background/60 px-10 py-4 text-[11px] tracking-luxe uppercase text-background transition-all duration-500 hover:bg-background hover:text-foreground sm:order-2 sm:px-9"
           >
             Ver Detalhes
           </a>
