@@ -7,7 +7,7 @@ const links = [
   { href: "#historia", label: "Nossa História" },
   { href: "#evento", label: "Evento" },
   { href: "#rsvp", label: "RSVP" },
-  { href: "#galeria", label: "Galeria" },
+  { href: "#galeria", label: "Galeria", hidden: true },
   { href: "#presentes", label: "Presentes" },
   { href: "#faq", label: "FAQ" },
 ];
@@ -44,7 +44,7 @@ export function Nav() {
         </a>
 
         <nav className="hidden lg:flex items-center gap-9">
-          {links.map((l) => (
+          {links.filter((l) => !l.hidden).map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -86,7 +86,7 @@ export function Nav() {
               </button>
             </div>
             <nav className="flex flex-col items-center justify-center gap-7 pt-16">
-              {links.map((l, i) => (
+              {links.filter((l) => !l.hidden).map((l, i) => (
                 <motion.a
                   key={l.href}
                   href={l.href}

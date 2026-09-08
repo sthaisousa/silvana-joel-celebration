@@ -11,6 +11,8 @@ import { Mural } from "@/components/wedding/Mural";
 import { Faq } from "@/components/wedding/Faq";
 import { Footer } from "@/components/wedding/Footer";
 
+const SHOW_GALLERY = false;
+
 export const Route = createFileRoute("/")({
   component: Index,
 });
@@ -24,7 +26,7 @@ function Index() {
       <Event />
       <Rsvp />
       <Mural />
-      <Gallery />
+      {SHOW_GALLERY && <Gallery />}
       <Gifts />
       <Travel />
       <Faq />
