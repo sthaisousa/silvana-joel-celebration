@@ -144,7 +144,7 @@ export function Mural() {
                     transition={{ delay: i * 0.05, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     className="bg-background border border-border p-7 shadow-soft"
                   >
-                    <p className="font-serif italic text-foreground/90 leading-relaxed text-balance">
+                    <p className="font-serif italic text-[17px] sm:text-lg text-foreground/90 leading-relaxed text-balance">
                       "{msg.message}"
                     </p>
                     <div className="mt-5 flex items-center gap-3">
