@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Reveal, SectionLabel } from "./Reveal";
+import { createGiftCheckout } from "@/fns/checkout";
 
-const gifts = [
+export const gifts = [
   {
     "title": "Liquidificador novo",
     "description": "Para facilitar o preparo das receitas do dia a dia e deixar a nova casa ainda mais prática.",
@@ -229,6 +231,31 @@ const gifts = [
 ];
 
 export function Gifts() {
+  const [payingGift, setPayingGift] = useState<string | null>(null);
+  const [checkoutMessage, setCheckoutMessage] = useState("");
+
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get("presente");
+    if (result === "sucesso") {
+      setCheckoutMessage("Pagamento concluído. Muito obrigado pelo presente!");
+    } else if (result === "cancelado") {
+      setCheckoutMessage("Pagamento cancelado. Você pode tentar novamente quando quiser.");
+    }
+  }, []);
+
+  async function handleGiftCheckout(title: string) {
+    setCheckoutMessage("");
+    setPayingGift(title);
+
+    try {
+      const { url } = await createGiftCheckout({ data: { title } });
+      window.location.assign(url);
+    } catch {
+      setCheckoutMessage("Não foi possível abrir o pagamento. Tente novamente em instantes.");
+      setPayingGift(null);
+    }
+  }
+
   return (
     <section id="presentes" className="relative py-28 sm:py-40">
       <div className="mx-auto max-w-6xl px-6 lg:px-12">
@@ -251,6 +278,14 @@ export function Gifts() {
               <span>Escolha um presente</span>
               <span>{gifts.length} opções</span>
             </div>
+            {checkoutMessage && (
+              <p
+                role="status"
+                className="mb-4 border border-primary/30 bg-primary/5 px-4 py-3 text-center text-sm text-foreground"
+              >
+                {checkoutMessage}
+              </p>
+            )}
             <div className="gift-scroll max-h-[42rem] overflow-y-auto overscroll-contain pr-2">
               <div className="grid gap-3 sm:grid-cols-2">
                 {gifts.map((gift) => (
@@ -271,8 +306,13 @@ export function Gifts() {
                     </div>
                     <div className="mt-5 flex items-end justify-between gap-4 border-t border-border/70 pt-4">
                       <p className="font-serif text-xl text-gradient-gold">{gift.price}</p>
-                      <button className="text-[10px] tracking-luxe uppercase text-foreground/60 transition-colors hover:text-foreground">
-                        Presentear
+                       <button
+                         type="button"
+                         disabled={payingGift !== null}
+                         onClick={() => handleGiftCheckout(gift.title)}
+                         className="text-[10px] tracking-luxe uppercase text-foreground/60 transition-colors hover:text-foreground disabled:cursor-wait disabled:opacity-50"
+                       >
+                         {payingGift === gift.title ? "Abrindo pagamento…" : "Presentear"}
                       </button>
                     </div>
                   </article>
