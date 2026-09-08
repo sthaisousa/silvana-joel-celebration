@@ -111,7 +111,30 @@ export function Event() {
         <Reveal delay={0.2}>
           <div className="mt-20 grid gap-8 md:grid-cols-2 text-center">
             {[
-              { t: "Dress Code", d: "Casual Chic & Esporte Fino" },
+              {
+                t: "Dress Code",
+                d: (
+                  <>
+                    <a
+                      href="https://www.instagram.com/reel/DQee7o9Dkqk/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline decoration-primary/50 underline-offset-4 transition-colors hover:text-primary"
+                    >
+                      Casual Chic
+                    </a>
+                    {" & "}
+                    <a
+                      href="https://www.instagram.com/reel/DN8_14EEb7j/?igsi=MTVqaDJoaG96aGJ0cw=="
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline decoration-primary/50 underline-offset-4 transition-colors hover:text-primary"
+                    >
+                      Esporte Fino
+                    </a>
+                  </>
+                ),
+              },
               { t: "Chegada", d: "Cerimônia inicia às 18h20. Sugerimos chegar às 18h00." },
             ].map((x) => (
               <div key={x.t} className="border-t border-border pt-6">
