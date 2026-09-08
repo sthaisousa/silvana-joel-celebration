@@ -1,12 +1,15 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { ReplitConnectors } from "@replit/connectors-sdk";
 import { createServerFn } from "@tanstack/react-start";
-import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
+import { deleteCookie, getCookie, getRequestHeader, setCookie } from "@tanstack/react-start/server";
 
 import { gifts as defaultGifts } from "@/components/wedding/Gifts";
 import { getPool } from "@/lib/db";
 
 const ADMIN_COOKIE = "wedding_admin";
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_WINDOW_MINUTES = 15;
+const LOGIN_BLOCK_MINUTES = 15;
 
 export type AdminGift = {
   id: number;
@@ -75,6 +78,118 @@ function sessionToken() {
     .digest("hex");
 }
 
+function loginOrigin() {
+  const forwardedFor = getRequestHeader("x-forwarded-for");
+  const address =
+    getRequestHeader("cf-connecting-ip") ??
+    forwardedFor?.split(",")[0]?.trim() ??
+    getRequestHeader("x-real-ip") ??
+    "unknown";
+
+  return createHmac("sha256", requireSecret("SESSION_SECRET"))
+    .update(`admin-login-origin:${address}`)
+    .digest("hex");
+}
+
+function blockedMessage(blockedUntil: Date) {
+  const seconds = Math.max(1, Math.ceil((blockedUntil.getTime() - Date.now()) / 1000));
+  const minutes = Math.ceil(seconds / 60);
+  const wait = minutes > 1 ? `${minutes} minutos` : "1 minuto";
+  return `Muitas tentativas incorretas. Tente novamente em ${wait}.`;
+}
+
+async function verifyAdminPassword(password: string) {
+  const pool = getPool();
+  const client = await pool.connect();
+  const originHash = loginOrigin();
+  let transactionOpen = false;
+
+  try {
+    await client.query("BEGIN");
+    transactionOpen = true;
+    await client.query(
+      `CREATE TABLE IF NOT EXISTS wedding_admin_login_attempts (
+         origin_hash TEXT PRIMARY KEY,
+         failed_attempts INTEGER NOT NULL DEFAULT 0,
+         window_started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+         blocked_until TIMESTAMPTZ,
+         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+       )`,
+    );
+    await client.query(
+      `INSERT INTO wedding_admin_login_attempts (origin_hash)
+       VALUES ($1)
+       ON CONFLICT (origin_hash) DO NOTHING`,
+      [originHash],
+    );
+
+    const result = await client.query<{
+      failed_attempts: number;
+      window_started_at: Date;
+      blocked_until: Date | null;
+    }>(
+      `SELECT failed_attempts, window_started_at, blocked_until
+       FROM wedding_admin_login_attempts
+       WHERE origin_hash = $1
+       FOR UPDATE`,
+      [originHash],
+    );
+    const attempt = result.rows[0];
+    const now = new Date();
+
+    if (attempt.blocked_until && attempt.blocked_until > now) {
+      await client.query("COMMIT");
+      transactionOpen = false;
+      throw new Error(blockedMessage(attempt.blocked_until));
+    }
+
+    if (safeEqual(password, requireSecret("ADMIN_PASSWORD"))) {
+      await client.query(
+        `UPDATE wedding_admin_login_attempts
+         SET failed_attempts = 0, window_started_at = NOW(),
+             blocked_until = NULL, updated_at = NOW()
+         WHERE origin_hash = $1`,
+        [originHash],
+      );
+      await client.query("COMMIT");
+      transactionOpen = false;
+      return;
+    }
+
+    const windowExpired =
+      now.getTime() - attempt.window_started_at.getTime() >= LOGIN_WINDOW_MINUTES * 60 * 1000;
+    const failedAttempts = windowExpired ? 1 : attempt.failed_attempts + 1;
+    const shouldBlock = failedAttempts >= LOGIN_ATTEMPT_LIMIT;
+    const updated = await client.query<{ blocked_until: Date | null }>(
+      `UPDATE wedding_admin_login_attempts
+       SET failed_attempts = $2,
+           window_started_at = CASE WHEN $3 THEN NOW() ELSE window_started_at END,
+           blocked_until = CASE
+             WHEN $4 THEN NOW() + ($5 * INTERVAL '1 minute')
+             ELSE NULL
+           END,
+           updated_at = NOW()
+       WHERE origin_hash = $1
+       RETURNING blocked_until`,
+      [originHash, failedAttempts, windowExpired, shouldBlock, LOGIN_BLOCK_MINUTES],
+    );
+    await client.query("COMMIT");
+    transactionOpen = false;
+
+    if (shouldBlock && updated.rows[0].blocked_until) {
+      throw new Error(blockedMessage(updated.rows[0].blocked_until));
+    }
+    throw new Error("Senha incorreta.");
+  } catch (error) {
+    if (transactionOpen) {
+      await client.query("ROLLBACK");
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 function isAuthenticated() {
   const cookie = getCookie(ADMIN_COOKIE);
   return Boolean(cookie && safeEqual(cookie, sessionToken()));
@@ -109,10 +224,10 @@ async function ensureGiftCatalog() {
           [gift.title, gift.description, centsFromPrice(gift.price), index],
         );
       }
-      await client.query(
-        "INSERT INTO wedding_site_settings (key, value) VALUES ($1, $2)",
-        ["gift_catalog_seeded", "true"],
-      );
+      await client.query("INSERT INTO wedding_site_settings (key, value) VALUES ($1, $2)", [
+        "gift_catalog_seeded",
+        "true",
+      ]);
     }
 
     await client.query("COMMIT");
@@ -184,9 +299,7 @@ export const loginAdmin = createServerFn({ method: "POST" })
     return { password };
   })
   .handler(async ({ data }) => {
-    if (!safeEqual(data.password, requireSecret("ADMIN_PASSWORD"))) {
-      throw new Error("Senha incorreta.");
-    }
+    await verifyAdminPassword(data.password);
 
     setCookie(ADMIN_COOKIE, sessionToken(), {
       httpOnly: true,
@@ -278,14 +391,7 @@ export const saveAdminGift = createServerFn({ method: "POST" })
          SET title = $1, description = $2, price_cents = $3, active = $4,
              sort_order = $5, updated_at = NOW()
          WHERE id = $6`,
-        [
-          data.title,
-          data.description,
-          data.price_cents,
-          data.active,
-          data.sort_order,
-          data.id,
-        ],
+        [data.title, data.description, data.price_cents, data.active, data.sort_order, data.id],
       );
     } else {
       await getPool().query(
