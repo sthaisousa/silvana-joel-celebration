@@ -114,7 +114,7 @@ export function Rsvp() {
                     <Check className="h-6 w-6" strokeWidth={1.5} />
                   </span>
                   <h3 className="mt-8 font-serif text-3xl sm:text-5xl text-balance">
-                    Obrigado!
+                    Obrigado 🤍
                   </h3>
                   <span className="mt-6 divider-gold" />
                   <p className="mt-6 max-w-md text-muted-foreground text-balance">
