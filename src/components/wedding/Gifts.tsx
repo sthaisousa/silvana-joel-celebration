@@ -239,6 +239,8 @@ export function Gifts() {
   const { data: storedGifts, isLoading } = useQuery({
     queryKey: ["wedding_gifts"],
     queryFn: () => getPublicGifts(),
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {
