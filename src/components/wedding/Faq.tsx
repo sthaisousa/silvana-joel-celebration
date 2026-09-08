@@ -6,7 +6,11 @@ import { Reveal, SectionLabel } from "./Reveal";
 const items = [
   {
     q: "Qual o dress code?",
-    a: "Esporte fino.",
+    a: "Casual Chic & Esporte Fino.",
+    links: [
+      "https://www.instagram.com/reel/DQee7o9Dkqk/",
+      "https://www.instagram.com/reel/DN8_14EEb7j/?igsi=MTVqaDJoaG96aGJ0cw==",
+    ],
   },
   {
     q: "Quais os horários?",
@@ -61,9 +65,24 @@ export function Faq() {
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="pb-7 pr-12 text-muted-foreground leading-relaxed text-balance">
-                        {it.a}
-                      </p>
+                      <div className="pb-7 pr-12 text-muted-foreground leading-relaxed">
+                        <p className="text-balance">{it.a}</p>
+                        {"links" in it && it.links && (
+                          <div className="mt-3 flex flex-col items-start gap-1.5">
+                            {it.links.map((href, linkIndex) => (
+                              <a
+                                key={href}
+                                href={href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sm text-primary underline underline-offset-4 transition-colors hover:text-foreground"
+                              >
+                                Conheça mais sobre o dress code {linkIndex + 1}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

@@ -111,7 +111,7 @@ export function Event() {
         <Reveal delay={0.2}>
           <div className="mt-20 grid gap-8 md:grid-cols-2 text-center">
             {[
-              { t: "Dress Code", d: "Esporte fino" },
+              { t: "Dress Code", d: "Casual Chic & Esporte Fino" },
               { t: "Chegada", d: "Cerimônia inicia às 18h20. Sugerimos chegar às 18h00." },
             ].map((x) => (
               <div key={x.t} className="border-t border-border pt-6">

@@ -8,7 +8,10 @@ type RsvpInput = {
   attending: "sim" | "nao";
 };
 
-const NOTIFICATION_EMAIL = "joel.barbosa.pereira.silva@gmail.com";
+const NOTIFICATION_EMAILS = [
+  "joel.barbosa.pereira.silva@gmail.com",
+  "sthaissousa1@gmail.com",
+];
 
 export const saveRsvp = createServerFn({ method: "POST" })
   .inputValidator((input: unknown): RsvpInput => {
@@ -47,7 +50,7 @@ export const saveRsvp = createServerFn({ method: "POST" })
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           from: "Casamento Silvana & Joel <onboarding@resend.dev>",
-          to: [NOTIFICATION_EMAIL],
+          to: NOTIFICATION_EMAILS,
           subject: `Nova confirmação de presença: ${data.name}`,
           text: [
             "Nova resposta recebida pelo site do casamento.",

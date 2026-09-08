@@ -10,13 +10,13 @@ const chapters = [
     year: "2023",
     title: "Onde tudo começou",
     text: "Nos conhecemos na Igreja da Cidade, em uma manhã de domingo de 2023. Assim que me viu, ele comentou com um amigo que eu fazia exatamente o tipo dele — e ficou torcendo para que eu voltasse. Mal sabíamos que aquele primeiro olhar seria o começo de tudo.",
-    img: s1,
+    img: s2,
   },
   {
     year: "Pouco depois",
     title: "A aproximação",
     text: "E eu voltei. A cada culto, ele encontrava um jeito de se aproximar e puxar conversa, sempre com aquele jeitinho de quem não queria nada. Aos poucos, entre encontros, sorrisos e conversas, fomos percebendo que havia algo especial acontecendo.",
-    img: s2,
+    img: s1,
   },
   {
     year: "O primeiro encontro",
