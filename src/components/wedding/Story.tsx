@@ -1,33 +1,40 @@
 import { Reveal, SectionLabel } from "./Reveal";
-import s1 from "@/assets/story-1.jpg";
-import s2 from "@/assets/story-2.jpg";
-import s3 from "@/assets/story-3.jpg";
-import s4 from "@/assets/story-4.jpg";
+import s1 from "@/assets/story-new-1.png";
+import s2 from "@/assets/story-new-2.png";
+import s3 from "@/assets/story-new-3.png";
+import s4 from "@/assets/story-new-4.png";
+import s5 from "@/assets/story-new-5.png";
 
 const chapters = [
   {
-    year: "2019",
-    title: "Como nos conhecemos",
-    text: "Em uma tarde silenciosa de outono, nossos caminhos se cruzaram por acaso — um sorriso tímido, uma conversa que não queria terminar, e a certeza de algo raro nascendo entre dois desconhecidos.",
+    year: "2023",
+    title: "Onde tudo começou",
+    text: "Nos conhecemos na Igreja da Cidade, em uma manhã de domingo de 2023. Assim que me viu, ele comentou com um amigo que eu fazia exatamente o tipo dele — e ficou torcendo para que eu voltasse. Mal sabíamos que aquele primeiro olhar seria o começo de tudo.",
     img: s1,
   },
   {
-    year: "2020",
-    title: "Primeiro encontro",
-    text: "Foi um jantar à luz de velas que se transformou em horas perdidas no tempo. Descobrimos que rir junto era a coisa mais natural do mundo — e que dali em diante, nada faria sentido sem o outro.",
+    year: "Pouco depois",
+    title: "A aproximação",
+    text: "E eu voltei. A cada culto, ele encontrava um jeito de se aproximar e puxar conversa, sempre com aquele jeitinho de quem não queria nada. Aos poucos, entre encontros, sorrisos e conversas, fomos percebendo que havia algo especial acontecendo.",
     img: s2,
   },
   {
-    year: "2024",
-    title: "O pedido",
-    text: "Entre oliveiras douradas e o último raio de sol do dia, ele se ajoelhou. As palavras vieram tremidas, mas verdadeiras. E a resposta foi um sim sussurrado, com lágrimas e o coração inteiro.",
+    year: "O primeiro encontro",
+    title: "Um ingresso que “sobrou”",
+    text: "Nosso primeiro encontro foi em um escape room, acompanhados de mais dois casais. Aparentemente, tinha “sobrado” um ingresso — uma coincidência muito bem planejada que acabou se tornando o início oficial da nossa aventura a dois.",
     img: s3,
   },
   {
-    year: "2026",
-    title: "O futuro",
-    text: "Sonhamos com uma casa cheia de luz, viagens lentas, manhãs sem pressa e uma vida construída com afeto e cumplicidade. Tudo começa aqui — em Campo Grande, no dia 12 de dezembro.",
+    year: "O namoro",
+    title: "O primeiro sim",
+    text: "Então veio o pedido de namoro: flores, carinho, um prato preparado especialmente para a ocasião e a pergunta que mudaria a nossa história. Foi ali que dissemos o primeiro de muitos “sins” que ainda viveríamos juntos.",
     img: s4,
+  },
+  {
+    year: "2 anos depois",
+    title: "Para sempre",
+    text: "No dia em que completamos dois anos de namoro, viajamos para Guarapari. Ele preparou um cenário com pétalas de rosas e, ao som de “A Thousand Years”, começou a contar todas as razões que o faziam me escolher todos os dias. Em meio à emoção, veio o pedido de casamento — e mais um lindo sim para a nossa história.",
+    img: s5,
   },
 ];
 
