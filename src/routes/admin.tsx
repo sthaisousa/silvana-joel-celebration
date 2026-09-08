@@ -46,14 +46,44 @@ const money = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const priceInput = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
 
+const welcomeMessages = [
+  "Hoje eu não tenho nenhum conselho. Só queria dizer oi.",
+  "🥔 Batata. Era essa a mensagem de hoje.",
+  "Você está linda. Não consigo te ver, mas mantenho minha afirmação.",
+  "Nenhuma mensagem profunda hoje. Vai trabalhar. 😂",
+  "Vim desejar bom dia. Mesmo que sejam 19h.",
+  "Um dia isso aqui tudo vai virar memória. Aproveita também. 🤍",
+  "Não sei o que você veio fazer aqui, mas vai dar certo",
+  "Este espaço poderia conter uma mensagem útil.",
+  "✨ Mensagem motivacional indisponível. Tente novamente após um café.",
+  "Você abriu o admin. Eu apareci. Cada um cumprindo seu papel.",
+  "Hoje é um ótimo dia para... sei lá, comer um pão de queijo.",
+  "Não tenho nada para acrescentar. Só gosto de aparecer.",
+  "Oi. 🙂",
+  "Você de novo. 🙂",
+  "VAI DAR TUDO CERTO. Fonte: eu decidi.",
+  "Nenhum pensamento. Apenas 💍.",
+  "Esta mensagem foi cuidadosamente selecionada entre várias mensagens igualmente inúteis.",
+  "Tentei falar com a Beyonce para cantar no casamento, a gente tá negociando isso ainda",
+  "A Dua Lipa aceitou cantar",
+  "Se você está lendo isso, o login funcionou. Tecnologia.",
+  "A gente vai ter que adicionar o Joel no nosso point de encontro lá da cafeteria, né?",
+] as const;
+
 function AdminPage() {
   const queryClient = useQueryClient();
+  const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   const session = useQuery({ queryKey: ["admin-session"], queryFn: getAdminSession, retry: false });
   const authenticated = session.data?.authenticated === true;
 
   const login = useMutation({
     mutationFn: loginAdmin,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-session"] }),
+    onSuccess: () => {
+      setWelcomeMessage(
+        welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
+      );
+      queryClient.invalidateQueries({ queryKey: ["admin-session"] });
+    },
   });
   const logout = useMutation({
     mutationFn: logoutAdmin,
@@ -66,7 +96,14 @@ function AdminPage() {
   if (session.isLoading) return <LoadingScreen />;
   if (!authenticated) return <LoginScreen onLogin={(password) => login.mutate({ data: { password } })} error={login.error} busy={login.isPending} />;
 
-  return <AdminWorkspace onLogout={() => logout.mutate()} loggingOut={logout.isPending} />;
+  return (
+    <AdminWorkspace
+      onLogout={() => logout.mutate()}
+      loggingOut={logout.isPending}
+      welcomeMessage={welcomeMessage}
+      onCloseWelcome={() => setWelcomeMessage(null)}
+    />
+  );
 }
 
 function LoadingScreen() {
@@ -109,7 +146,17 @@ function LoginScreen({ onLogin, error, busy }: { onLogin: (password: string) => 
   );
 }
 
-function AdminWorkspace({ onLogout, loggingOut }: { onLogout: () => void; loggingOut: boolean }) {
+function AdminWorkspace({
+  onLogout,
+  loggingOut,
+  welcomeMessage,
+  onCloseWelcome,
+}: {
+  onLogout: () => void;
+  loggingOut: boolean;
+  welcomeMessage: string | null;
+  onCloseWelcome: () => void;
+}) {
   const queryClient = useQueryClient();
   const data = useQuery({ queryKey: ["admin-data"], queryFn: getAdminData, retry: 1 });
   const save = useMutation({ mutationFn: saveAdminGift, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-data"] }) });
@@ -209,7 +256,61 @@ function AdminWorkspace({ onLogout, loggingOut }: { onLogout: () => void; loggin
         </section>
       </div>
       {editing && <GiftEditor gift={editing} onClose={() => setEditing(null)} onSave={submitGift} saving={save.isPending} />}
+      {welcomeMessage && (
+        <WelcomeModal message={welcomeMessage} onClose={onCloseWelcome} />
+      )}
     </main>
+  );
+}
+
+function WelcomeModal({
+  message,
+  onClose,
+}: {
+  message: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#26362d]/55 p-5 backdrop-blur-sm"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="welcome-title"
+        className="relative w-full max-w-lg border border-[#d6b477]/60 bg-[#fbf8f2] px-7 py-9 text-center shadow-2xl sm:px-12 sm:py-12"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fechar mensagem"
+          className="absolute right-4 top-4 p-2 text-[#8b9188] transition-colors hover:text-[#303a31]"
+        >
+          <X size={18} />
+        </button>
+        <p className="font-sans text-[10px] uppercase tracking-[0.26em] text-[#b49159]">
+          Área dos noivos
+        </p>
+        <h2
+          id="welcome-title"
+          className="mt-5 font-serif text-3xl leading-snug text-[#26362d] sm:text-4xl"
+        >
+          {message}
+        </h2>
+        <button
+          type="button"
+          autoFocus
+          onClick={onClose}
+          className="mt-9 border border-[#26362d] px-7 py-3 font-sans text-[10px] uppercase tracking-[0.18em] text-[#26362d] transition-colors hover:bg-[#26362d] hover:text-[#f7f1e8]"
+        >
+          Continuar
+        </button>
+      </section>
+    </div>
   );
 }
 
