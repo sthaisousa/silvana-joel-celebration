@@ -1,0 +1,1 @@
+- [TanStack Start no Autoscale](tanstack-start-autoscale.md) — use build Node e servidor Bun; Cloudflare Worker com pg trava o SSR e falha no health check.
