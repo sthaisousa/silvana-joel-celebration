@@ -2,14 +2,28 @@ import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reveal, SectionLabel } from "./Reveal";
 import { Check } from "lucide-react";
+import { saveRsvp } from "@/fns/rsvp";
 
 export function Rsvp() {
   const [sent, setSent] = useState(false);
   const [attending, setAttending] = useState<"sim" | "nao">("sim");
+  const [name, setName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setSent(true);
+    setError("");
+    setSubmitting(true);
+
+    try {
+      await saveRsvp({ data: { name, attending } });
+      setSent(true);
+    } catch {
+      setError("Não foi possível registrar sua confirmação. Tente novamente.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -44,6 +58,8 @@ export function Rsvp() {
                     <input
                       required
                       type="text"
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
                       placeholder="Como você quer ser anunciado"
                       className="input-luxe"
                     />
@@ -74,11 +90,17 @@ export function Rsvp() {
                   <div className="flex justify-center">
                     <button
                       type="submit"
+                      disabled={submitting}
                       className="group inline-flex items-center justify-center bg-gradient-gold text-background px-16 py-5 text-[12px] tracking-luxe uppercase transition-all duration-700 hover:shadow-elegant shadow-soft font-medium"
                     >
-                      Confirmar Presença
+                      {submitting ? "Confirmando…" : "Confirmar Presença"}
                     </button>
                   </div>
+                  {error && (
+                    <p role="alert" className="text-center text-sm text-red-700">
+                      {error}
+                    </p>
+                  )}
                 </motion.form>
               ) : (
                 <motion.div

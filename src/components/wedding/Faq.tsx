@@ -6,7 +6,7 @@ import { Reveal, SectionLabel } from "./Reveal";
 const items = [
   {
     q: "Qual o dress code?",
-    a: "Esporte Fino.",
+    a: "Esporte fino.",
   },
   {
     q: "Quais os horários?",
