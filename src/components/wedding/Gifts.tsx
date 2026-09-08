@@ -1,6 +1,9 @@
+/* @refresh skip */
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Reveal, SectionLabel } from "./Reveal";
 import { createGiftCheckout } from "@/fns/checkout";
+import { getPublicGifts } from "@/fns/admin";
 
 export const gifts = [
   {
@@ -231,8 +234,12 @@ export const gifts = [
 ];
 
 export function Gifts() {
-  const [payingGift, setPayingGift] = useState<string | null>(null);
+  const [payingGift, setPayingGift] = useState<number | null>(null);
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const { data: storedGifts, isLoading } = useQuery({
+    queryKey: ["wedding_gifts"],
+    queryFn: () => getPublicGifts(),
+  });
 
   useEffect(() => {
     const result = new URLSearchParams(window.location.search).get("presente");
@@ -243,12 +250,12 @@ export function Gifts() {
     }
   }, []);
 
-  async function handleGiftCheckout(title: string) {
+  async function handleGiftCheckout(id: number) {
     setCheckoutMessage("");
-    setPayingGift(title);
+    setPayingGift(id);
 
     try {
-      const { url } = await createGiftCheckout({ data: { title } });
+      const { url } = await createGiftCheckout({ data: { giftId: id } });
       window.location.assign(url);
     } catch {
       setCheckoutMessage("Não foi possível abrir o pagamento. Tente novamente em instantes.");
@@ -276,7 +283,7 @@ export function Gifts() {
           <div className="mt-16 rounded-sm border border-border bg-secondary/10 p-3 sm:p-5">
             <div className="mb-4 flex items-center justify-between px-2 text-xs text-muted-foreground">
               <span>Escolha um presente</span>
-              <span>{gifts.length} opções</span>
+              <span>{storedGifts?.length ?? 0} opções</span>
             </div>
             {checkoutMessage && (
               <p
@@ -287,8 +294,13 @@ export function Gifts() {
               </p>
             )}
             <div className="gift-scroll max-h-[42rem] overflow-y-auto overscroll-contain pr-2">
+              {isLoading && (
+                <p className="py-12 text-center text-sm text-muted-foreground">
+                  Carregando presentes…
+                </p>
+              )}
               <div className="grid gap-3 sm:grid-cols-2">
-                {gifts.map((gift) => (
+                {storedGifts?.map((gift) => (
                   <article
                     key={gift.title}
                     className="group flex min-h-44 flex-col justify-between border border-border bg-background p-5 transition-all duration-500 hover:-translate-y-0.5 hover:shadow-elegant"
@@ -305,14 +317,19 @@ export function Gifts() {
                       </p>
                     </div>
                     <div className="mt-5 flex items-end justify-between gap-4 border-t border-border/70 pt-4">
-                      <p className="font-serif text-xl text-gradient-gold">{gift.price}</p>
+                      <p className="font-serif text-xl text-gradient-gold">
+                        {(gift.price_cents / 100).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </p>
                        <button
                          type="button"
                          disabled={payingGift !== null}
-                         onClick={() => handleGiftCheckout(gift.title)}
+                         onClick={() => handleGiftCheckout(gift.id)}
                          className="text-[10px] tracking-luxe uppercase text-foreground/60 transition-colors hover:text-foreground disabled:cursor-wait disabled:opacity-50"
                        >
-                         {payingGift === gift.title ? "Abrindo pagamento…" : "Presentear"}
+                         {payingGift === gift.id ? "Abrindo pagamento…" : "Presentear"}
                       </button>
                     </div>
                   </article>

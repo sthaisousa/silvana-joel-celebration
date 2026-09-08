@@ -1,7 +1,7 @@
 import { ReplitConnectors } from "@replit/connectors-sdk";
 import { createServerFn } from "@tanstack/react-start";
 
-import { gifts } from "@/components/wedding/Gifts";
+import { getPool } from "@/lib/db";
 
 type StripeProduct = {
   id: string;
@@ -18,16 +18,6 @@ type StripePrice = {
 type StripeList<T> = {
   data: T[];
 };
-
-function priceInCents(formattedPrice: string) {
-  const normalized = formattedPrice
-    .replace("R$", "")
-    .trim()
-    .replace(/\./g, "")
-    .replace(",", ".");
-
-  return Math.round(Number(normalized) * 100);
-}
 
 async function stripeRequest<T>(
   connectors: ReplitConnectors,
@@ -56,25 +46,29 @@ export const createGiftCheckout = createServerFn({ method: "POST" })
       throw new Error("Presente inválido.");
     }
 
-    const title = (input as { title?: unknown }).title;
-    if (typeof title !== "string") {
+    const giftId = Number((input as { giftId?: unknown }).giftId);
+    if (!Number.isInteger(giftId) || giftId <= 0) {
       throw new Error("Presente inválido.");
     }
 
-    const gift = gifts.find((item) => item.title === title);
-    if (!gift) {
-      throw new Error("Presente não encontrado.");
-    }
-
-    return { title: gift.title };
+    return { giftId };
   })
   .handler(async ({ data }) => {
-    const gift = gifts.find((item) => item.title === data.title);
+    const giftResult = await getPool().query<{
+      title: string;
+      description: string;
+      price_cents: number;
+    }>(
+      `SELECT title, description, price_cents
+       FROM wedding_gifts WHERE id = $1 AND active = TRUE LIMIT 1`,
+      [data.giftId],
+    );
+    const gift = giftResult.rows[0];
     if (!gift) {
       throw new Error("Presente não encontrado.");
     }
 
-    const unitAmount = priceInCents(gift.price);
+    const unitAmount = gift.price_cents;
     if (!Number.isInteger(unitAmount) || unitAmount <= 0) {
       throw new Error("Valor do presente inválido.");
     }
@@ -91,7 +85,7 @@ export const createGiftCheckout = createServerFn({ method: "POST" })
     );
 
     let product = products.data.find(
-      (item) => item.metadata?.wedding_gift_title === gift.title,
+      (item) => item.metadata?.wedding_gift_id === String(data.giftId),
     );
 
     if (!product) {
@@ -99,6 +93,7 @@ export const createGiftCheckout = createServerFn({ method: "POST" })
       body.set("name", gift.title);
       body.set("description", gift.description);
       body.set("metadata[wedding_gift_title]", gift.title);
+      body.set("metadata[wedding_gift_id]", String(data.giftId));
       body.set("metadata[event]", "silvana-joel");
 
       product = await stripeRequest<StripeProduct>(connectors, "/v1/products", {
@@ -135,6 +130,7 @@ export const createGiftCheckout = createServerFn({ method: "POST" })
     checkoutBody.set("cancel_url", `https://${domain}/?presente=cancelado#presentes`);
     checkoutBody.set("locale", "pt-BR");
     checkoutBody.set("metadata[wedding_gift_title]", gift.title);
+    checkoutBody.set("metadata[wedding_gift_id]", String(data.giftId));
 
     const session = await stripeRequest<{ url: string | null }>(
       connectors,

@@ -35,6 +35,14 @@ export function Footer() {
           <span>para nossos convidados</span>
         </div>
       </div>
+      <a
+        href="/admin"
+        aria-label="Acessar área administrativa"
+        title="Área reservada"
+        className="absolute bottom-4 right-4 text-[11px] text-background/10 transition-colors duration-500 hover:text-background/35 focus-visible:text-background/50 focus-visible:outline-none"
+      >
+        🤍
+      </a>
     </footer>
   );
 }
