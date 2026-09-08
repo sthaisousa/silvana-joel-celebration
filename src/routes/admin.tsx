@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronDown,
   CircleAlert,
+  CircleDollarSign,
   Eye,
   EyeOff,
   Gift,
@@ -26,6 +27,7 @@ import {
   logoutAdmin,
   saveAdminGift,
   type AdminGift,
+  type AdminGiftPurchase,
   type AdminRsvp,
 } from "@/fns/admin";
 
@@ -117,6 +119,7 @@ function AdminWorkspace({ onLogout, loggingOut }: { onLogout: () => void; loggin
   const [rsvpFilter, setRsvpFilter] = useState<"all" | "yes" | "no">("all");
   const gifts = data.data?.gifts ?? [];
   const rsvps = data.data?.rsvps ?? [];
+  const purchases = data.data?.purchases ?? [];
   const activeGifts = gifts.filter((gift) => gift.active).length;
   const attending = rsvps.filter((rsvp) => rsvp.attending).length;
   const filteredRsvps = useMemo(() => rsvps.filter((rsvp) => {
@@ -145,11 +148,20 @@ function AdminWorkspace({ onLogout, loggingOut }: { onLogout: () => void; loggin
           <p className="font-sans text-xs text-[#768073]">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" }).format(new Date())}</p>
         </div>
         {data.isError && <div className="mb-8 flex items-center justify-between border border-[#c88977]/40 bg-[#f8e9e3] px-4 py-3 font-sans text-sm text-[#794e42]"><span>Não foi possível carregar os dados.</span><button onClick={() => data.refetch()} className="underline">Tentar novamente</button></div>}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Stat icon={<Gift size={18} />} label="Presentes ativos" value={data.isLoading ? "—" : `${activeGifts}`} detail={`${gifts.length} cadastrados`} />
+          <Stat icon={<CircleDollarSign size={18} />} label="Presentes comprados" value={data.isLoading ? "—" : `${purchases.length}`} detail="pagamentos confirmados" accent />
           <Stat icon={<CheckCircle2 size={18} />} label="Confirmados" value={data.isLoading ? "—" : `${attending}`} detail={`de ${rsvps.length} respostas`} accent />
           <Stat icon={<Users size={18} />} label="Não confirmados" value={data.isLoading ? "—" : `${rsvps.length - attending}`} detail="não poderão comparecer" />
         </div>
+        {data.data?.purchaseSyncError && (
+          <div className="mt-6 flex items-center justify-between gap-4 border border-[#c88977]/40 bg-[#f8e9e3] px-4 py-3 font-sans text-sm text-[#794e42]">
+            <span>Não foi possível consultar os pagamentos do Stripe agora.</span>
+            <button onClick={() => data.refetch()} className="shrink-0 underline">
+              Tentar novamente
+            </button>
+          </div>
+        )}
         <div className="mt-12 grid gap-10 xl:grid-cols-[1.45fr_1fr]">
           <section className="min-w-0">
             <div className="mb-4 flex items-end justify-between gap-4"><div><p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">Catálogo</p><h2 className="mt-2 font-serif text-3xl text-[#26362d]">Lista de presentes</h2></div><button onClick={() => setEditing({ id: 0, title: "", description: "", price_cents: 0, active: true, sort_order: gifts.length })} className="flex items-center gap-2 border border-[#b49159] px-4 py-2.5 font-sans text-[10px] uppercase tracking-[0.18em] text-[#806338] transition-colors hover:bg-[#b49159] hover:text-[#fffaf2]"><Plus size={15} /> Novo presente</button></div>
@@ -166,6 +178,35 @@ function AdminWorkspace({ onLogout, loggingOut }: { onLogout: () => void; loggin
             </div>
           </section>
         </div>
+        <section className="mt-12 min-w-0">
+          <div className="mb-4">
+            <p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">
+              Stripe
+            </p>
+            <h2 className="mt-2 font-serif text-3xl text-[#26362d]">
+              Presentes efetivamente comprados
+            </h2>
+            <p className="mt-2 font-sans text-xs text-[#768073]">
+              Somente pagamentos confirmados pelo Stripe aparecem nesta lista.
+            </p>
+          </div>
+          <div className="overflow-hidden border border-[#d9cfbf] bg-[#fbf8f2]">
+            {data.isLoading ? (
+              <GiftSkeleton />
+            ) : purchases.length === 0 ? (
+              <Empty
+                icon={<CircleDollarSign size={22} />}
+                title="Nenhum presente comprado ainda"
+              />
+            ) : (
+              <div className="divide-y divide-[#e4dbce]">
+                {purchases.map((purchase) => (
+                  <PurchaseRow key={purchase.id} purchase={purchase} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
       {editing && <GiftEditor gift={editing} onClose={() => setEditing(null)} onSave={submitGift} saving={save.isPending} />}
     </main>
@@ -182,6 +223,42 @@ function GiftRow({ gift, onEdit, onDelete, onToggle, busy }: { gift: AdminGift; 
 
 function RsvpRow({ rsvp }: { rsvp: AdminRsvp }) {
   return <div className="flex items-center justify-between gap-3 px-4 py-3.5"><div className="flex min-w-0 items-center gap-3"><div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-sm ${rsvp.attending ? "bg-[#dfe7d8] text-[#587052]" : "bg-[#e9e1d5] text-[#8b8174]"}`}>{rsvp.name.charAt(0).toUpperCase()}</div><div className="min-w-0"><p className="truncate font-sans text-sm text-[#303a31]">{rsvp.name}</p><p className="font-sans text-[10px] text-[#a0a49d]">{new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(rsvp.created_at))}</p></div></div><span className={`flex shrink-0 items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.1em] ${rsvp.attending ? "text-[#587052]" : "text-[#9b8d7d]"}`}>{rsvp.attending ? <><Check size={13} /> Confirmado</> : "Não confirmado"}</span></div>;
+}
+
+function PurchaseRow({ purchase }: { purchase: AdminGiftPurchase }) {
+  const buyer = purchase.buyer_name || purchase.buyer_email || "Convidado";
+  const date = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(purchase.created_at));
+
+  return (
+    <div className="grid gap-3 px-4 py-4 sm:grid-cols-[1fr_auto] sm:items-center sm:px-5">
+      <div className="min-w-0">
+        <p className="font-sans text-sm font-medium text-[#303a31]">
+          {purchase.gift_title}
+        </p>
+        <p className="mt-1 truncate font-sans text-xs text-[#8b9188]">
+          {buyer}
+          {purchase.buyer_name && purchase.buyer_email
+            ? ` · ${purchase.buyer_email}`
+            : ""}
+        </p>
+      </div>
+      <div className="flex items-center justify-between gap-5 sm:justify-end">
+        <div className="text-right">
+          <p className="font-serif text-lg text-[#806338]">
+            {money(purchase.amount_total)}
+          </p>
+          <p className="font-sans text-[10px] text-[#a0a49d]">{date}</p>
+        </div>
+        <span className="flex items-center gap-1.5 font-sans text-[9px] uppercase tracking-[0.1em] text-[#587052]">
+          <Check size={13} />
+          Pago
+        </span>
+      </div>
+    </div>
+  );
 }
 
 function Empty({ icon, title, action }: { icon: ReactNode; title: string; action?: () => void }) {

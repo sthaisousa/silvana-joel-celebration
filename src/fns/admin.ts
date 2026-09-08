@@ -1,4 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { ReplitConnectors } from "@replit/connectors-sdk";
 import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 
@@ -21,6 +22,30 @@ export type AdminRsvp = {
   name: string;
   attending: boolean;
   created_at: string;
+};
+
+export type AdminGiftPurchase = {
+  id: string;
+  gift_id: number | null;
+  gift_title: string;
+  amount_total: number;
+  currency: string;
+  buyer_name: string | null;
+  buyer_email: string | null;
+  created_at: string;
+};
+
+type StripeCheckoutSession = {
+  id: string;
+  payment_status: string;
+  amount_total: number | null;
+  currency: string | null;
+  created: number;
+  customer_details?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
+  metadata?: Record<string, string>;
 };
 
 function requireSecret(name: "ADMIN_PASSWORD" | "SESSION_SECRET") {
@@ -92,6 +117,54 @@ async function ensureGiftCatalog() {
   }
 }
 
+async function getPaidGiftPurchases(): Promise<AdminGiftPurchase[]> {
+  const connectors = new ReplitConnectors();
+  const sessions: StripeCheckoutSession[] = [];
+  let startingAfter: string | undefined;
+
+  do {
+    const params = new URLSearchParams({ limit: "100", status: "complete" });
+    if (startingAfter) params.set("starting_after", startingAfter);
+
+    const response = await connectors.proxy(
+      "stripe",
+      `/v1/checkout/sessions?${params.toString()}`,
+      { method: "GET" },
+    );
+
+    if (!response.ok) {
+      console.error("Falha ao consultar compras no Stripe:", await response.text());
+      throw new Error("Não foi possível consultar os pagamentos do Stripe.");
+    }
+
+    const page = (await response.json()) as {
+      data: StripeCheckoutSession[];
+      has_more: boolean;
+    };
+    sessions.push(...page.data);
+    startingAfter = page.has_more ? page.data.at(-1)?.id : undefined;
+  } while (startingAfter);
+
+  return sessions
+    .filter(
+      (session) =>
+        session.payment_status === "paid" &&
+        session.metadata?.wedding_gift_title &&
+        session.metadata?.wedding_gift_id,
+    )
+    .map((session) => ({
+      id: session.id,
+      gift_id: Number(session.metadata?.wedding_gift_id) || null,
+      gift_title: session.metadata?.wedding_gift_title ?? "Presente",
+      amount_total: session.amount_total ?? 0,
+      currency: session.currency ?? "brl",
+      buyer_name: session.customer_details?.name ?? null,
+      buyer_email: session.customer_details?.email ?? null,
+      created_at: new Date(session.created * 1000).toISOString(),
+    }))
+    .sort((left, right) => right.created_at.localeCompare(left.created_at));
+}
+
 export const getAdminSession = createServerFn({ method: "GET" }).handler(async () => ({
   authenticated: isAuthenticated(),
 }));
@@ -137,7 +210,7 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
   requireAdmin();
   await ensureGiftCatalog();
 
-  const [giftResult, rsvpResult] = await Promise.all([
+  const [giftResult, rsvpResult, purchaseResult] = await Promise.all([
     getPool().query<AdminGift>(
       `SELECT id, title, description, price_cents, active, sort_order
        FROM wedding_gifts ORDER BY sort_order, id`,
@@ -146,9 +219,20 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
       `SELECT id, name, attending, created_at
        FROM wedding_rsvps ORDER BY created_at DESC, id DESC`,
     ),
+    getPaidGiftPurchases()
+      .then((purchases) => ({ purchases, error: false }))
+      .catch((error) => {
+        console.error("Falha ao carregar presentes comprados:", error);
+        return { purchases: [] as AdminGiftPurchase[], error: true };
+      }),
   ]);
 
-  return { gifts: giftResult.rows, rsvps: rsvpResult.rows };
+  return {
+    gifts: giftResult.rows,
+    rsvps: rsvpResult.rows,
+    purchases: purchaseResult.purchases,
+    purchaseSyncError: purchaseResult.error,
+  };
 });
 
 export const saveAdminGift = createServerFn({ method: "POST" })

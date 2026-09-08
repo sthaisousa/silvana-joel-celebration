@@ -131,6 +131,7 @@ export const createGiftCheckout = createServerFn({ method: "POST" })
     checkoutBody.set("locale", "pt-BR");
     checkoutBody.set("metadata[wedding_gift_title]", gift.title);
     checkoutBody.set("metadata[wedding_gift_id]", String(data.giftId));
+    checkoutBody.set("metadata[event]", "silvana-joel");
 
     const session = await stripeRequest<{ url: string | null }>(
       connectors,
