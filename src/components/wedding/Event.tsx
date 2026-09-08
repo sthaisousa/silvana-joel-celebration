@@ -5,7 +5,7 @@ const ceremony = {
   icon: Church,
   title: "Cerimônia",
   date: "12 de Dezembro, 2026",
-  time: "18h00",
+  time: "18h20",
   place: "Ernesto Café Bar · R. Manoel Inácio de Souza, 507 A - Centro, Campo Grande - MS",
   map: "https://maps.google.com/?q=R.+Manoel+Inácio+de+Souza,+507+A+Campo+Grande+MS",
   embed:
@@ -17,7 +17,7 @@ const secondaryEvents = [
     icon: Wine,
     title: "Recepção",
     date: "12 de Dezembro, 2026",
-    time: "19h00",
+    time: "18h00",
     place: "Ernesto Café Bar · Campo Grande, MS",
     map: "https://maps.google.com/?q=R.+Manoel+Inácio+de+Souza,+507+A+Campo+Grande+MS",
   },
@@ -34,7 +34,7 @@ export function Event() {
               Uma noite para se <em className="italic">lembrar</em>
             </h2>
             <p className="mt-5 max-w-xl text-muted-foreground text-balance">
-              Três momentos pensados com carinho, para que cada hora ao seu lado seja inesquecível.
+              Cada momento foi pensado com carinho para que esta celebração ao seu lado seja inesquecível.
             </p>
           </div>
         </Reveal>
@@ -82,7 +82,7 @@ export function Event() {
           </article>
         </Reveal>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-xl gap-6">
           {secondaryEvents.map((e, i) => (
             <Reveal key={e.title} delay={i * 0.1}>
               <article className="group flex h-full items-center gap-5 bg-background/70 p-6 sm:p-7 shadow-soft border border-border transition-all duration-700 hover:shadow-elegant hover:-translate-y-0.5">
@@ -112,7 +112,7 @@ export function Event() {
           <div className="mt-20 grid gap-8 md:grid-cols-2 text-center">
             {[
               { t: "Dress Code", d: "Black tie · tons sóbrios e atemporais" },
-              { t: "Chegada", d: "Sugerimos chegar 30 minutos antes da cerimônia" },
+              { t: "Chegada", d: "Cerimônia inicia às 18h20. Sugerimos chegar às 18h00." },
             ].map((x) => (
               <div key={x.t} className="border-t border-border pt-6">
                 <p className="text-[11px] tracking-luxe uppercase text-primary">{x.t}</p>

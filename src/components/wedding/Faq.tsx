@@ -10,7 +10,7 @@ const items = [
   },
   {
     q: "Quais os horários?",
-    a: "Cerimônia às 18h00 e recepção a partir das 17h30. Sugerimos chegar 30 minutos antes da cerimônia.",
+    a: "A recepção inicia às 18h00 e a cerimônia às 18h20. Sugerimos chegar às 18h00.",
   },
   {
     q: "Sugestões de hospedagem?",
