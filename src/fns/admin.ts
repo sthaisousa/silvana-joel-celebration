@@ -24,6 +24,13 @@ export type AdminRsvp = {
   created_at: string;
 };
 
+export type AdminMessage = {
+  id: number;
+  name: string;
+  message: string;
+  created_at: string;
+};
+
 export type AdminGiftPurchase = {
   id: string;
   gift_id: number | null;
@@ -210,7 +217,7 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
   requireAdmin();
   await ensureGiftCatalog();
 
-  const [giftResult, rsvpResult, purchaseResult] = await Promise.all([
+  const [giftResult, rsvpResult, messageResult, purchaseResult] = await Promise.all([
     getPool().query<AdminGift>(
       `SELECT id, title, description, price_cents, active, sort_order
        FROM wedding_gifts ORDER BY sort_order, id`,
@@ -218,6 +225,10 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
     getPool().query<AdminRsvp>(
       `SELECT id, name, attending, created_at
        FROM wedding_rsvps ORDER BY created_at DESC, id DESC`,
+    ),
+    getPool().query<AdminMessage>(
+      `SELECT id, name, message, created_at
+       FROM wedding_messages ORDER BY created_at DESC, id DESC`,
     ),
     getPaidGiftPurchases()
       .then((purchases) => ({ purchases, error: false }))
@@ -230,6 +241,7 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
   return {
     gifts: giftResult.rows,
     rsvps: rsvpResult.rows,
+    messages: messageResult.rows,
     purchases: purchaseResult.purchases,
     purchaseSyncError: purchaseResult.error,
   };

@@ -12,6 +12,7 @@ import {
   EyeOff,
   Gift,
   LogOut,
+  MessageCircle,
   Plus,
   Search,
   ShieldCheck,
@@ -28,6 +29,7 @@ import {
   saveAdminGift,
   type AdminGift,
   type AdminGiftPurchase,
+  type AdminMessage,
   type AdminRsvp,
 } from "@/fns/admin";
 
@@ -167,6 +169,7 @@ function AdminWorkspace({
   const gifts = data.data?.gifts ?? [];
   const rsvps = data.data?.rsvps ?? [];
   const purchases = data.data?.purchases ?? [];
+  const messages = data.data?.messages ?? [];
   const activeGifts = gifts.filter((gift) => gift.active).length;
   const attending = rsvps.filter((rsvp) => rsvp.attending).length;
   const filteredRsvps = useMemo(() => rsvps.filter((rsvp) => {
@@ -225,6 +228,37 @@ function AdminWorkspace({
             </div>
           </section>
         </div>
+        <section className="mt-12 min-w-0">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">
+                Mural dos convidados
+              </p>
+              <h2 className="mt-2 font-serif text-3xl text-[#26362d]">
+                Recados deixados aos noivos
+              </h2>
+            </div>
+            <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-[#9ca096]">
+              {messages.length} {messages.length === 1 ? "recado" : "recados"}
+            </span>
+          </div>
+          <div className="overflow-hidden border border-[#d9cfbf] bg-[#fbf8f2]">
+            {data.isLoading ? (
+              <GiftSkeleton />
+            ) : messages.length === 0 ? (
+              <Empty
+                icon={<MessageCircle size={22} />}
+                title="Nenhum recado recebido ainda"
+              />
+            ) : (
+              <div className="grid divide-y divide-[#e4dbce] md:grid-cols-2 md:divide-y-0">
+                {messages.map((message) => (
+                  <MessageCard key={message.id} message={message} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
         <section className="mt-12 min-w-0">
           <div className="mb-4">
             <p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">
@@ -359,6 +393,30 @@ function PurchaseRow({ purchase }: { purchase: AdminGiftPurchase }) {
         </span>
       </div>
     </div>
+  );
+}
+
+function MessageCard({ message }: { message: AdminMessage }) {
+  const date = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(message.created_at));
+
+  return (
+    <article className="border-[#e4dbce] p-5 md:border-b md:odd:border-r sm:p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eee4d2] text-[#806338]">
+          <MessageCircle size={16} />
+        </div>
+        <time className="font-sans text-[10px] text-[#a0a49d]">{date}</time>
+      </div>
+      <blockquote className="mt-5 font-serif text-xl italic leading-relaxed text-[#303a31]">
+        “{message.message}”
+      </blockquote>
+      <p className="mt-4 font-sans text-[10px] uppercase tracking-[0.16em] text-[#806338]">
+        {message.name}
+      </p>
+    </article>
   );
 }
 
