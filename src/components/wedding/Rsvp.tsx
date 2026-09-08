@@ -114,11 +114,11 @@ export function Rsvp() {
                     <Check className="h-6 w-6" strokeWidth={1.5} />
                   </span>
                   <h3 className="mt-8 font-serif text-3xl sm:text-5xl text-balance">
-                    Obrigado, do fundo do coração.
+                    Obrigado!
                   </h3>
                   <span className="mt-6 divider-gold" />
                   <p className="mt-6 max-w-md text-muted-foreground text-balance">
-                    Sua confirmação foi recebida. Mal podemos esperar para celebrar este dia ao seu lado.
+                    Sua confirmação foi recebida e estamos ansiosos para celebrar este dia ao seu lado.
                   </p>
                   <p className="mt-10 font-serif italic text-foreground/80">
                     — Silvana &amp; Joel
