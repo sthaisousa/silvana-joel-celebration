@@ -438,17 +438,25 @@ function PixPaymentModal({
           />
         </div>
         <p className="mt-5 text-sm text-muted-foreground">
-          Escaneie o QR Code no aplicativo do seu banco ou copie a chave Pix:
+          Escaneie o QR Code no aplicativo do seu banco ou use o Pix copia e cola:
         </p>
-        <p className="mt-2 select-all font-mono text-sm text-foreground">
-          {PIX_KEY}
+        <textarea
+          readOnly
+          value={payload}
+          aria-label="Código Pix copia e cola"
+          rows={4}
+          onFocus={(event) => event.currentTarget.select()}
+          className="mt-3 w-full resize-none break-all border border-border bg-secondary/10 p-3 text-left font-mono text-[10px] leading-relaxed text-foreground outline-none focus:border-primary"
+        />
+        <p className="mt-3 text-xs text-muted-foreground">
+          Chave Pix: <span className="font-mono text-foreground">{PIX_KEY}</span>
         </p>
         <button
           type="button"
           onClick={copyPixCode}
           className="mt-5 border border-primary px-5 py-3 text-[10px] tracking-luxe uppercase text-foreground transition-colors hover:bg-primary/10"
         >
-          {copied ? "Código Pix copiado" : "Copiar código Pix"}
+          {copied ? "Pix copia e cola copiado" : "Copiar Pix copia e cola"}
         </button>
         <p className="mt-4 text-xs text-muted-foreground">
           Confirme o valor de{" "}
