@@ -14,6 +14,7 @@ import {
   LogOut,
   MessageCircle,
   Plus,
+  Phone,
   Search,
   ShieldCheck,
   Trash2,
@@ -198,7 +199,10 @@ function AdminWorkspace({
   const activeGifts = gifts.filter((gift) => gift.active).length;
   const attending = rsvps.filter((rsvp) => rsvp.attending).length;
   const filteredRsvps = useMemo(() => rsvps.filter((rsvp) => {
-    const matchesSearch = rsvp.name.toLowerCase().includes(search.toLowerCase());
+    const searchTerm = search.toLowerCase();
+    const matchesSearch =
+      rsvp.name.toLowerCase().includes(searchTerm) ||
+      rsvp.phone?.toLowerCase().includes(searchTerm);
     return matchesSearch && (rsvpFilter === "all" || (rsvpFilter === "yes" ? rsvp.attending : !rsvp.attending));
   }), [rsvps, search, rsvpFilter]);
 
@@ -247,7 +251,7 @@ function AdminWorkspace({
           <section className="min-w-0">
             <div className="mb-4"><p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">Lista de presença</p><h2 className="mt-2 font-serif text-3xl text-[#26362d]">Quem vem celebrar</h2></div>
             <div className="border border-[#d9cfbf] bg-[#fbf8f2]">
-               <div className="flex flex-col gap-3 border-b border-[#d9cfbf] p-4 sm:flex-row"><div className="relative flex-1"><Search size={15} className="absolute left-0 top-2.5 text-[#9ca096]" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome" className="w-full border-0 border-b border-[#d9cfbf] bg-transparent py-2 pl-7 font-sans text-sm outline-none focus:border-[#b49159]" /></div><div className="relative"><select value={rsvpFilter} onChange={(e) => setRsvpFilter(e.target.value as typeof rsvpFilter)} className="w-full appearance-none border border-[#d9cfbf] bg-transparent px-3 py-2 pr-8 font-sans text-[10px] uppercase tracking-[0.12em] outline-none"><option value="all">Todas as respostas</option><option value="yes">Confirmados</option><option value="no">Não confirmados</option></select><ChevronDown size={13} className="pointer-events-none absolute right-2 top-2.5" /></div></div>
+                <div className="flex flex-col gap-3 border-b border-[#d9cfbf] p-4 sm:flex-row"><div className="relative flex-1"><Search size={15} className="absolute left-0 top-2.5 text-[#9ca096]" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome ou telefone" className="w-full border-0 border-b border-[#d9cfbf] bg-transparent py-2 pl-7 font-sans text-sm outline-none focus:border-[#b49159]" /></div><div className="relative"><select value={rsvpFilter} onChange={(e) => setRsvpFilter(e.target.value as typeof rsvpFilter)} className="w-full appearance-none border border-[#d9cfbf] bg-transparent px-3 py-2 pr-8 font-sans text-[10px] uppercase tracking-[0.12em] outline-none"><option value="all">Todas as respostas</option><option value="yes">Confirmados</option><option value="no">Não confirmados</option></select><ChevronDown size={13} className="pointer-events-none absolute right-2 top-2.5" /></div></div>
               {data.isLoading ? <RsvpSkeleton /> : filteredRsvps.length === 0 ? <Empty icon={<Users size={22} />} title={rsvps.length ? "Nenhum nome encontrado" : "Nenhuma confirmação ainda"} /> : <div className="divide-y divide-[#e4dbce]">{filteredRsvps.map((rsvp) => <RsvpRow key={rsvp.id} rsvp={rsvp} />)}</div>}
               {filteredRsvps.length > 0 && <p className="border-t border-[#d9cfbf] px-4 py-3 font-sans text-[10px] uppercase tracking-[0.12em] text-[#9ca096]">{filteredRsvps.length} {filteredRsvps.length === 1 ? "pessoa" : "pessoas"} exibidas</p>}
             </div>
@@ -406,7 +410,42 @@ function GiftRow({ gift, onEdit, onDelete, onToggle, busy }: { gift: AdminGift; 
 }
 
 function RsvpRow({ rsvp }: { rsvp: AdminRsvp }) {
-  return <div className="flex items-center justify-between gap-3 px-4 py-3.5"><div className="flex min-w-0 items-center gap-3"><div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-sm ${rsvp.attending ? "bg-[#dfe7d8] text-[#587052]" : "bg-[#e9e1d5] text-[#8b8174]"}`}>{rsvp.name.charAt(0).toUpperCase()}</div><div className="min-w-0"><p className="truncate font-sans text-sm text-[#303a31]">{rsvp.name}</p><p className="font-sans text-[10px] text-[#a0a49d]">{new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(rsvp.created_at))}</p></div></div><span className={`flex shrink-0 items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.1em] ${rsvp.attending ? "text-[#587052]" : "text-[#9b8d7d]"}`}>{rsvp.attending ? <><Check size={13} /> Confirmado</> : "Não confirmado"}</span></div>;
+  const phone = formatPhone(rsvp.phone);
+
+  return (
+    <div className="flex items-start justify-between gap-3 px-4 py-3.5">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-sm ${rsvp.attending ? "bg-[#dfe7d8] text-[#587052]" : "bg-[#e9e1d5] text-[#8b8174]"}`}>
+          {rsvp.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate font-sans text-sm text-[#303a31]">{rsvp.name}</p>
+          {phone ? (
+            <a href={`tel:${rsvp.phone}`} className="mt-1 flex items-center gap-1.5 truncate font-sans text-xs text-[#806338] hover:underline">
+              <Phone size={12} />
+              {phone}
+            </a>
+          ) : (
+            <p className="mt-1 font-sans text-[10px] text-[#a0a49d]">Telefone não informado</p>
+          )}
+          <p className="mt-1 font-sans text-[10px] text-[#a0a49d]">
+            {new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(new Date(rsvp.created_at))}
+          </p>
+        </div>
+      </div>
+      <span className={`flex shrink-0 items-center gap-1.5 pt-1 font-sans text-[10px] uppercase tracking-[0.1em] ${rsvp.attending ? "text-[#587052]" : "text-[#9b8d7d]"}`}>
+        {rsvp.attending ? <><Check size={13} /> Confirmado</> : "Não confirmado"}
+      </span>
+    </div>
+  );
+}
+
+function formatPhone(phone: string | null) {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 11) return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+  if (digits.length === 10) return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, "($1) $2-$3");
+  return phone;
 }
 
 function PurchaseRow({ purchase }: { purchase: AdminGiftPurchase }) {

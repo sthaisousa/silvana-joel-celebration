@@ -1,10 +1,11 @@
 import { ReplitConnectors } from "@replit/connectors-sdk";
 import { createServerFn } from "@tanstack/react-start";
 
-import { getPool } from "../lib/db";
+import { ensureRsvpPhoneColumn, getPool } from "../lib/db";
 
 type RsvpInput = {
   name: string;
+  phone: string;
   attending: "sim" | "nao";
 };
 
@@ -19,26 +20,32 @@ export const saveRsvp = createServerFn({ method: "POST" })
       throw new Error("Dados de confirmação inválidos.");
     }
 
-    const { name, attending } = input as Partial<RsvpInput>;
+    const { name, phone, attending } = input as Partial<RsvpInput>;
     const normalizedName = name?.trim();
+    const phoneDigits = phone?.replace(/\D/g, "");
 
     if (!normalizedName || normalizedName.length > 255) {
       throw new Error("Informe um nome válido.");
+    }
+
+    if (!phoneDigits || phoneDigits.length < 10 || phoneDigits.length > 15) {
+      throw new Error("Informe um telefone válido com DDD.");
     }
 
     if (attending !== "sim" && attending !== "nao") {
       throw new Error("Informe se poderá comparecer.");
     }
 
-    return { name: normalizedName, attending };
+    return { name: normalizedName, phone: phoneDigits, attending };
   })
   .handler(async ({ data }) => {
     const pool = getPool();
     const attending = data.attending === "sim";
 
+    await ensureRsvpPhoneColumn();
     await pool.query(
-      "INSERT INTO wedding_rsvps (name, attending) VALUES ($1, $2)",
-      [data.name, attending],
+      "INSERT INTO wedding_rsvps (name, phone, attending) VALUES ($1, $2, $3)",
+      [data.name, data.phone, attending],
     );
 
     let emailSent = false;
@@ -56,6 +63,7 @@ export const saveRsvp = createServerFn({ method: "POST" })
             "Nova resposta recebida pelo site do casamento.",
             "",
             `Nome: ${data.name}`,
+            `Telefone: ${data.phone}`,
             `Resposta: ${attending ? "Sim, estarei lá" : "Não poderei ir"}`,
           ].join("\n"),
         }),

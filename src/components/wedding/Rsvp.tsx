@@ -8,6 +8,7 @@ export function Rsvp() {
   const [sent, setSent] = useState(false);
   const [attending, setAttending] = useState<"sim" | "nao">("sim");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,7 +18,7 @@ export function Rsvp() {
     setSubmitting(true);
 
     try {
-      await saveRsvp({ data: { name, attending } });
+      await saveRsvp({ data: { name, phone, attending } });
       setSent(true);
     } catch {
       setError("Não foi possível registrar sua confirmação. Tente novamente.");
@@ -61,6 +62,19 @@ export function Rsvp() {
                       value={name}
                       onChange={(event) => setName(event.target.value)}
                       placeholder="Como você quer ser anunciado"
+                      className="input-luxe"
+                    />
+                  </Field>
+
+                  <Field label="Telefone">
+                    <input
+                      required
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      placeholder="(11) 99999-9999"
                       className="input-luxe"
                     />
                   </Field>

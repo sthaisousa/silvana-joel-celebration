@@ -4,7 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, getRequestHeader, setCookie } from "@tanstack/react-start/server";
 
 import { gifts as defaultGifts } from "@/components/wedding/Gifts";
-import { getPool } from "@/lib/db";
+import { ensureRsvpPhoneColumn, getPool } from "@/lib/db";
 
 const ADMIN_COOKIE = "wedding_admin";
 const LOGIN_ATTEMPT_LIMIT = 5;
@@ -23,6 +23,7 @@ export type AdminGift = {
 export type AdminRsvp = {
   id: number;
   name: string;
+  phone: string | null;
   attending: boolean;
   created_at: string;
 };
@@ -329,6 +330,7 @@ export const getPublicGifts = createServerFn({ method: "GET" }).handler(async ()
 export const getAdminData = createServerFn({ method: "GET" }).handler(async () => {
   requireAdmin();
   await ensureGiftCatalog();
+  await ensureRsvpPhoneColumn();
 
   const [giftResult, rsvpResult, messageResult, purchaseResult] = await Promise.all([
     getPool().query<AdminGift>(
@@ -336,7 +338,7 @@ export const getAdminData = createServerFn({ method: "GET" }).handler(async () =
        FROM wedding_gifts ORDER BY sort_order, id`,
     ),
     getPool().query<AdminRsvp>(
-      `SELECT id, name, attending, created_at
+      `SELECT id, name, phone, attending, created_at
        FROM wedding_rsvps ORDER BY created_at DESC, id DESC`,
     ),
     getPool().query<AdminMessage>(
