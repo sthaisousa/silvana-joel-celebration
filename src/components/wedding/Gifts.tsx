@@ -1,8 +1,7 @@
 /* @refresh skip */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Reveal, SectionLabel } from "./Reveal";
-import { createGiftCheckout } from "@/fns/checkout";
 import { getPublicGifts } from "@/fns/admin";
 
 export const gifts = [
@@ -233,37 +232,57 @@ export const gifts = [
   }
 ];
 
+const PIX_KEY = "36220438817";
+
+function pixField(id: string, value: string) {
+  return `${id}${value.length.toString().padStart(2, "0")}${value}`;
+}
+
+function crc16(payload: string) {
+  let crc = 0xffff;
+  for (let index = 0; index < payload.length; index += 1) {
+    crc ^= payload.charCodeAt(index) << 8;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc & 0x8000) !== 0 ? (crc << 1) ^ 0x1021 : crc << 1;
+      crc &= 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+}
+
+function createPixPayload(amountCents: number) {
+  const merchantAccount = [
+    pixField("00", "br.gov.bcb.pix"),
+    pixField("01", PIX_KEY),
+  ].join("");
+  const additionalData = pixField("05", "***");
+  const payload = [
+    pixField("00", "01"),
+    pixField("01", "11"),
+    pixField("26", merchantAccount),
+    pixField("52", "0000"),
+    pixField("53", "986"),
+    pixField("54", (amountCents / 100).toFixed(2)),
+    pixField("58", "BR"),
+    pixField("59", "SILVANA E JOEL"),
+    pixField("60", "CAMPO GRANDE"),
+    pixField("62", additionalData),
+  ].join("");
+
+  return `${payload}6304${crc16(`${payload}6304`)}`;
+}
+
 export function Gifts() {
-  const [payingGift, setPayingGift] = useState<number | null>(null);
-  const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [pixGift, setPixGift] = useState<{
+    title: string;
+    price_cents: number;
+  } | null>(null);
   const { data: storedGifts, isLoading } = useQuery({
     queryKey: ["wedding_gifts"],
     queryFn: () => getPublicGifts(),
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
   });
-
-  useEffect(() => {
-    const result = new URLSearchParams(window.location.search).get("presente");
-    if (result === "sucesso") {
-      setCheckoutMessage("Pagamento concluído. Muito obrigado pelo presente!");
-    } else if (result === "cancelado") {
-      setCheckoutMessage("Pagamento cancelado. Você pode tentar novamente quando quiser.");
-    }
-  }, []);
-
-  async function handleGiftCheckout(id: number) {
-    setCheckoutMessage("");
-    setPayingGift(id);
-
-    try {
-      const { url } = await createGiftCheckout({ data: { giftId: id } });
-      window.location.assign(url);
-    } catch {
-      setCheckoutMessage("Não foi possível abrir o pagamento. Tente novamente em instantes.");
-      setPayingGift(null);
-    }
-  }
 
   return (
     <section id="presentes" className="relative py-28 sm:py-40">
@@ -287,14 +306,6 @@ export function Gifts() {
               <span>Escolha um presente</span>
               <span>{storedGifts?.length ?? 0} opções</span>
             </div>
-            {checkoutMessage && (
-              <p
-                role="status"
-                className="mb-4 border border-primary/30 bg-primary/5 px-4 py-3 text-center text-sm text-foreground"
-              >
-                {checkoutMessage}
-              </p>
-            )}
             <div className="gift-scroll max-h-[42rem] overflow-y-auto overscroll-contain pr-2">
               {isLoading && (
                 <p className="py-12 text-center text-sm text-muted-foreground">
@@ -327,11 +338,15 @@ export function Gifts() {
                       </p>
                        <button
                          type="button"
-                         disabled={payingGift !== null}
-                         onClick={() => handleGiftCheckout(gift.id)}
-                         className="text-[10px] tracking-luxe uppercase text-foreground/60 transition-colors hover:text-foreground disabled:cursor-wait disabled:opacity-50"
+                          onClick={() =>
+                            setPixGift({
+                              title: gift.title,
+                              price_cents: gift.price_cents,
+                            })
+                          }
+                          className="text-[10px] tracking-luxe uppercase text-foreground/60 transition-colors hover:text-foreground"
                        >
-                         {payingGift === gift.id ? "Abrindo pagamento…" : "Presentear"}
+                          Presentear
                       </button>
                     </div>
                   </article>
@@ -341,6 +356,10 @@ export function Gifts() {
           </div>
         </Reveal>
       </div>
+
+      {pixGift && (
+        <PixPaymentModal gift={pixGift} onClose={() => setPixGift(null)} />
+      )}
 
       <style>{`
         .gift-scroll {
@@ -355,5 +374,91 @@ export function Gifts() {
         }
       `}</style>
     </section>
+  );
+}
+
+function PixPaymentModal({
+  gift,
+  onClose,
+}: {
+  gift: { title: string; price_cents: number };
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const payload = createPixPayload(gift.price_cents);
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(payload)}`;
+
+  async function copyPixCode() {
+    await navigator.clipboard.writeText(payload);
+    setCopied(true);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-5 backdrop-blur-sm"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pix-payment-title"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto bg-background p-6 text-center shadow-2xl sm:p-8"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fechar pagamento Pix"
+          className="absolute right-4 top-4 text-xl text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ×
+        </button>
+        <p className="text-[10px] tracking-luxe uppercase text-primary">
+          Pagamento via Pix
+        </p>
+        <h2 id="pix-payment-title" className="mt-3 font-serif text-3xl">
+          {gift.title}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Valor:{" "}
+          {(gift.price_cents / 100).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })}
+        </p>
+        <div className="mx-auto mt-6 w-fit border border-border bg-white p-3">
+          <img
+            src={qrCodeUrl}
+            alt="QR Code para pagamento via Pix"
+            width={240}
+            height={240}
+            className="h-60 w-60"
+          />
+        </div>
+        <p className="mt-5 text-sm text-muted-foreground">
+          Escaneie o QR Code no aplicativo do seu banco ou copie a chave Pix:
+        </p>
+        <p className="mt-2 select-all font-mono text-sm text-foreground">
+          {PIX_KEY}
+        </p>
+        <button
+          type="button"
+          onClick={copyPixCode}
+          className="mt-5 border border-primary px-5 py-3 text-[10px] tracking-luxe uppercase text-foreground transition-colors hover:bg-primary/10"
+        >
+          {copied ? "Código Pix copiado" : "Copiar código Pix"}
+        </button>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Confirme o valor de{" "}
+          {(gift.price_cents / 100).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })}{" "}
+          antes de concluir o pagamento.
+        </p>
+      </section>
+    </div>
   );
 }
