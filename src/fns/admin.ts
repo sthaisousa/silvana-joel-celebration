@@ -1,10 +1,10 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { ReplitConnectors } from "@replit/connectors-sdk";
 import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, getRequestHeader, setCookie } from "@tanstack/react-start/server";
 
 import { gifts as defaultGifts } from "@/components/wedding/Gifts";
-import { ensureRsvpPhoneColumn, getPool } from "@/lib/db";
+import { ensureGiftPurchasesTable, ensureRsvpPhoneColumn, getPool } from "@/lib/db";
+import { reconcilePurchase } from "./purchases";
 
 const ADMIN_COOKIE = "wedding_admin";
 const LOGIN_ATTEMPT_LIMIT = 5;
@@ -44,19 +44,6 @@ export type AdminGiftPurchase = {
   buyer_name: string | null;
   buyer_email: string | null;
   created_at: string;
-};
-
-type StripeCheckoutSession = {
-  id: string;
-  payment_status: string;
-  amount_total: number | null;
-  currency: string | null;
-  created: number;
-  customer_details?: {
-    name?: string | null;
-    email?: string | null;
-  } | null;
-  metadata?: Record<string, string>;
 };
 
 function requireSecret(name: "ADMIN_PASSWORD" | "SESSION_SECRET") {
@@ -241,51 +228,35 @@ async function ensureGiftCatalog() {
 }
 
 async function getPaidGiftPurchases(): Promise<AdminGiftPurchase[]> {
-  const connectors = new ReplitConnectors();
-  const sessions: StripeCheckoutSession[] = [];
-  let startingAfter: string | undefined;
+  await ensureGiftPurchasesTable();
 
-  do {
-    const params = new URLSearchParams({ limit: "100", status: "complete" });
-    if (startingAfter) params.set("starting_after", startingAfter);
+  const result = await getPool().query<{
+    id: number;
+    gift_id: number | null;
+    gift_title: string;
+    amount_cents: number;
+    currency: string;
+    buyer_name: string | null;
+    buyer_email: string | null;
+    created_at: string;
+  }>(
+    `SELECT id, gift_id, gift_title, amount_cents, currency,
+            buyer_name, buyer_email, created_at
+       FROM wedding_gift_purchases
+      WHERE status = 'paid'
+      ORDER BY COALESCE(paid_at, created_at) DESC, id DESC`,
+  );
 
-    const response = await connectors.proxy(
-      "stripe",
-      `/v1/checkout/sessions?${params.toString()}`,
-      { method: "GET" },
-    );
-
-    if (!response.ok) {
-      console.error("Falha ao consultar compras no Stripe:", await response.text());
-      throw new Error("Não foi possível consultar os pagamentos do Stripe.");
-    }
-
-    const page = (await response.json()) as {
-      data: StripeCheckoutSession[];
-      has_more: boolean;
-    };
-    sessions.push(...page.data);
-    startingAfter = page.has_more ? page.data.at(-1)?.id : undefined;
-  } while (startingAfter);
-
-  return sessions
-    .filter(
-      (session) =>
-        session.payment_status === "paid" &&
-        session.metadata?.wedding_gift_title &&
-        session.metadata?.wedding_gift_id,
-    )
-    .map((session) => ({
-      id: session.id,
-      gift_id: Number(session.metadata?.wedding_gift_id) || null,
-      gift_title: session.metadata?.wedding_gift_title ?? "Presente",
-      amount_total: session.amount_total ?? 0,
-      currency: session.currency ?? "brl",
-      buyer_name: session.customer_details?.name ?? null,
-      buyer_email: session.customer_details?.email ?? null,
-      created_at: new Date(session.created * 1000).toISOString(),
-    }))
-    .sort((left, right) => right.created_at.localeCompare(left.created_at));
+  return result.rows.map((row) => ({
+    id: String(row.id),
+    gift_id: row.gift_id,
+    gift_title: row.gift_title,
+    amount_total: row.amount_cents,
+    currency: row.currency,
+    buyer_name: row.buyer_name,
+    buyer_email: row.buyer_email,
+    created_at: row.created_at,
+  }));
 }
 
 export const getAdminSession = createServerFn({ method: "GET" }).handler(async () => ({
@@ -417,3 +388,42 @@ export const deleteAdminGift = createServerFn({ method: "POST" })
     await getPool().query("DELETE FROM wedding_gifts WHERE id = $1", [data.id]);
     return { deleted: true };
   });
+
+/**
+ * Rede de seguranca da confirmacao no retorno: o convidado que paga por Pix
+ * costuma fechar a aba sem voltar ao site, e a compra fica presa em `pending`.
+ * Este botao reconsulta o Mercado Pago e promove o que ja foi aprovado.
+ */
+export const syncGiftPurchases = createServerFn({ method: "POST" }).handler(async () => {
+  requireAdmin();
+
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken) {
+    throw new Error("MP_ACCESS_TOKEN nao configurado.");
+  }
+
+  await ensureGiftPurchasesTable();
+
+  const pending = await getPool().query<{ external_reference: string }>(
+    `SELECT external_reference
+       FROM wedding_gift_purchases
+      WHERE status = 'pending'
+        AND provider = 'mercadopago'
+        AND external_reference IS NOT NULL`,
+  );
+
+  let confirmed = 0;
+  let failed = 0;
+
+  for (const row of pending.rows) {
+    try {
+      const result = await reconcilePurchase(row.external_reference, accessToken);
+      if (result.status === "paid") confirmed += 1;
+    } catch (error) {
+      failed += 1;
+      console.error("Falha ao sincronizar", row.external_reference, error);
+    }
+  }
+
+  return { checked: pending.rows.length, confirmed, failed };
+});

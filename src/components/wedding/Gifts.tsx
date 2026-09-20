@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Reveal, SectionLabel } from "./Reveal";
 import { getPublicGifts } from "@/fns/admin";
+import { createGiftCheckout } from "@/fns/checkout";
 
 export const gifts = [
   {
@@ -274,6 +275,7 @@ function createPixPayload(amountCents: number) {
 
 export function Gifts() {
   const [pixGift, setPixGift] = useState<{
+    id: number;
     title: string;
     price_cents: number;
   } | null>(null);
@@ -340,6 +342,7 @@ export function Gifts() {
                          type="button"
                           onClick={() =>
                             setPixGift({
+                              id: gift.id,
                               title: gift.title,
                               price_cents: gift.price_cents,
                             })
@@ -381,7 +384,7 @@ function PixPaymentModal({
   gift,
   onClose,
 }: {
-  gift: { title: string; price_cents: number };
+  gift: { id: number; title: string; price_cents: number };
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -466,7 +469,84 @@ function PixPaymentModal({
           })}{" "}
           antes de concluir o pagamento.
         </p>
+
+        <CardCheckout gift={gift} />
       </section>
     </div>
+  );
+}
+
+function CardCheckout({ gift }: { gift: { id: number; title: string } }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function goToCheckout(event: React.FormEvent) {
+    event.preventDefault();
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const { url } = await createGiftCheckout({
+        data: { giftId: gift.id, buyerName: name },
+      });
+      window.location.href = url;
+    } catch (cause) {
+      console.error(cause);
+      setError("Não foi possível abrir o pagamento. Tente novamente.");
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="mt-6 border-t border-border/70 pt-5">
+        <p className="text-xs text-muted-foreground">Prefere pagar no cartão?</p>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-3 text-[10px] tracking-luxe uppercase text-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
+        >
+          Pagar com cartão de crédito
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={goToCheckout} className="mt-6 border-t border-border/70 pt-5 text-left">
+      <label
+        htmlFor="card-buyer-name"
+        className="text-[10px] tracking-luxe uppercase text-primary"
+      >
+        Seu nome
+      </label>
+      <input
+        id="card-buyer-name"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        required
+        maxLength={255}
+        autoFocus
+        placeholder="Nome e sobrenome"
+        className="mt-2 w-full border border-border bg-secondary/10 p-3 text-sm text-foreground outline-none focus:border-primary"
+      />
+      <p className="mt-2 text-xs text-muted-foreground">
+        Para sabermos de quem veio o presente.
+      </p>
+
+      {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="mt-4 w-full border border-primary px-5 py-3 text-[10px] tracking-luxe uppercase text-foreground transition-colors hover:bg-primary/10 disabled:opacity-60"
+      >
+        {submitting ? "Abrindo pagamento…" : "Continuar para o cartão"}
+      </button>
+    </form>
   );
 }
