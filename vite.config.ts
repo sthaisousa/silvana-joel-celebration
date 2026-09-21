@@ -19,6 +19,12 @@ export default defineConfig({
       port: 5000,
       strictPort: true,
       allowedHosts: true,
+      // No Replit o cache do bun fica dentro do workspace (.cache/.bun). Vigiar
+      // esses milhares de arquivos estoura o limite de descritores (EMFILE) e
+      // o servidor de dev nem sobe.
+      watch: {
+        ignored: ["**/.cache/**"],
+      },
     },
   },
 });
