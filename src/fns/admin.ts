@@ -4,7 +4,6 @@ import { deleteCookie, getCookie, getRequestHeader, setCookie } from "@tanstack/
 
 import { gifts as defaultGifts } from "@/components/wedding/Gifts";
 import { ensureGiftPurchasesTable, ensureRsvpPhoneColumn, getPool } from "@/lib/db";
-import { reconcilePurchase } from "@/lib/reconcile-purchase";
 
 const ADMIN_COOKIE = "wedding_admin";
 const LOGIN_ATTEMPT_LIMIT = 5;
@@ -388,42 +387,3 @@ export const deleteAdminGift = createServerFn({ method: "POST" })
     await getPool().query("DELETE FROM wedding_gifts WHERE id = $1", [data.id]);
     return { deleted: true };
   });
-
-/**
- * Rede de seguranca da confirmacao no retorno: o convidado que paga por Pix
- * costuma fechar a aba sem voltar ao site, e a compra fica presa em `pending`.
- * Este botao reconsulta o Mercado Pago e promove o que ja foi aprovado.
- */
-export const syncGiftPurchases = createServerFn({ method: "POST" }).handler(async () => {
-  requireAdmin();
-
-  const accessToken = process.env.MP_ACCESS_TOKEN;
-  if (!accessToken) {
-    throw new Error("MP_ACCESS_TOKEN nao configurado.");
-  }
-
-  await ensureGiftPurchasesTable();
-
-  const pending = await getPool().query<{ external_reference: string }>(
-    `SELECT external_reference
-       FROM wedding_gift_purchases
-      WHERE status = 'pending'
-        AND provider = 'mercadopago'
-        AND external_reference IS NOT NULL`,
-  );
-
-  let confirmed = 0;
-  let failed = 0;
-
-  for (const row of pending.rows) {
-    try {
-      const result = await reconcilePurchase(row.external_reference, accessToken);
-      if (result.status === "paid") confirmed += 1;
-    } catch (error) {
-      failed += 1;
-      console.error("Falha ao sincronizar", row.external_reference, error);
-    }
-  }
-
-  return { checked: pending.rows.length, confirmed, failed };
-});

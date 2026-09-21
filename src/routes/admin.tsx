@@ -28,7 +28,6 @@ import {
   loginAdmin,
   logoutAdmin,
   saveAdminGift,
-  syncGiftPurchases,
   type AdminGift,
   type AdminGiftPurchase,
   type AdminMessage,
@@ -190,19 +189,6 @@ function AdminWorkspace({
   const data = useQuery({ queryKey: ["admin-data"], queryFn: getAdminData, retry: 1 });
   const save = useMutation({ mutationFn: saveAdminGift, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-data"] }) });
   const remove = useMutation({ mutationFn: deleteAdminGift, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-data"] }) });
-  const [syncResult, setSyncResult] = useState<string | null>(null);
-  const sync = useMutation({
-    mutationFn: syncGiftPurchases,
-    onSuccess: (result) => {
-      setSyncResult(
-        result.confirmed > 0
-          ? `${result.confirmed} de ${result.checked} pendente(s) confirmado(s).`
-          : `Nenhum pagamento novo entre ${result.checked} pendente(s).`,
-      );
-      queryClient.invalidateQueries({ queryKey: ["admin-data"] });
-    },
-    onError: () => setSyncResult("Falha ao sincronizar com o Mercado Pago."),
-  });
   const [editing, setEditing] = useState<AdminGift | null>(null);
   const [search, setSearch] = useState("");
   const [rsvpFilter, setRsvpFilter] = useState<"all" | "yes" | "no">("all");
@@ -306,28 +292,16 @@ function AdminWorkspace({
           <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-sans text-[10px] uppercase tracking-[0.24em] text-[#b49159]">
-                Mercado Pago
+                InfinitePay
               </p>
               <h2 className="mt-2 font-serif text-3xl text-[#26362d]">
                 Presentes efetivamente comprados
               </h2>
               <p className="mt-2 font-sans text-xs text-[#768073]">
-                Somente pagamentos confirmados aparecem nesta lista. Presentes pagos
-                por Pix não entram aqui — confira no extrato.
+                Pagamentos confirmados pela InfinitePay, no cartão ou no Pix dela.
+                Presentes pagos pelo QR code de Pix do próprio site não entram
+                aqui — confira no extrato.
               </p>
-            </div>
-            <div className="text-right">
-              <button
-                onClick={() => sync.mutate({})}
-                disabled={sync.isPending}
-                className="flex items-center gap-2 border border-[#b49159] px-4 py-2.5 font-sans text-[10px] uppercase tracking-[0.18em] text-[#806338] transition-colors hover:bg-[#b49159] hover:text-[#fffaf2] disabled:opacity-60"
-              >
-                <ArrowUpRight size={15} />
-                {sync.isPending ? "Sincronizando…" : "Sincronizar"}
-              </button>
-              {syncResult && (
-                <p className="mt-2 font-sans text-xs text-[#768073]">{syncResult}</p>
-              )}
             </div>
           </div>
           <div className="overflow-hidden border border-[#d9cfbf] bg-[#fbf8f2]">

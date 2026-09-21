@@ -40,13 +40,23 @@ export function ensureGiftPurchasesTable() {
            buyer_name TEXT,
            buyer_email TEXT,
            status TEXT NOT NULL DEFAULT 'pending',
-           provider TEXT NOT NULL DEFAULT 'mercadopago',
+           provider TEXT NOT NULL DEFAULT 'infinitepay',
            external_reference TEXT UNIQUE,
            provider_payment_id TEXT,
            payment_method TEXT,
            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
            paid_at TIMESTAMPTZ
          )`,
+      )
+      // Colunas da InfinitePay: o payment_check precisa do slug, e o
+      // comprovante e as parcelas ajudam a conferir cada presente no /admin.
+      .then(() =>
+        getPool().query(
+          `ALTER TABLE wedding_gift_purchases
+             ADD COLUMN IF NOT EXISTS provider_invoice_slug TEXT,
+             ADD COLUMN IF NOT EXISTS receipt_url TEXT,
+             ADD COLUMN IF NOT EXISTS installments INTEGER`,
+        ),
       )
       .then(() => undefined)
       .catch((error) => {

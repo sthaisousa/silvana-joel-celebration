@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
 import { confirmGiftPayment } from "@/fns/purchases";
+import { parseReturnParams } from "@/lib/infinitepay";
 
-type Outcome = "sucesso" | "pendente" | "falhou";
+type Outcome = "sucesso" | "pendente";
 
 const MESSAGES: Record<Outcome, { title: string; body: string }> = {
   sucesso: {
@@ -11,43 +12,35 @@ const MESSAGES: Record<Outcome, { title: string; body: string }> = {
   },
   pendente: {
     title: "Pagamento em processamento",
-    body: "Assim que o Mercado Pago confirmar, o presente entra na nossa lista. Obrigado!",
-  },
-  falhou: {
-    title: "O pagamento não foi concluído",
-    body: "Nada foi cobrado. Se quiser tentar de novo, é só escolher o presente outra vez.",
+    body: "Assim que a confirmação chegar, o presente entra na nossa lista. Obrigado!",
   },
 };
 
 /**
- * O convidado volta do Mercado Pago em /?presente=<estado>&ref=<referencia>.
- * Aqui a referencia e reconsultada no servidor para promover a compra a `paid`,
- * e a URL e limpa para um F5 nao reprocessar nem repetir a mensagem.
+ * A InfinitePay devolve o convidado para a raiz do site com order_nsu,
+ * transaction_nsu e slug na URL — ela so redireciona depois do pagamento
+ * concluido. A referencia e reconsultada no servidor antes de valer, e a URL
+ * e limpa para um F5 nao reprocessar nem repetir a mensagem.
  */
 export function GiftPaymentReturn() {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const state = params.get("presente") as Outcome | null;
-    if (!state || !(state in MESSAGES)) return;
+    const ref = parseReturnParams(new URLSearchParams(window.location.search));
+    if (!ref) return;
 
-    const reference = params.get("ref");
-    setOutcome(state);
-
+    setOutcome("sucesso");
     window.history.replaceState(null, "", `${window.location.pathname}#presentes`);
 
-    if (state === "sucesso" && reference) {
-      confirmGiftPayment({ data: { externalReference: reference } })
-        .then((result) => {
-          if (result.status !== "paid") setOutcome("pendente");
-        })
-        .catch((error) => {
-          // O pagamento pode ter dado certo mesmo assim; o botao de sincronizar
-          // no /admin recupera depois. Nao alarmar o convidado.
-          console.error("Falha ao confirmar pagamento no retorno:", error);
-        });
-    }
+    confirmGiftPayment({ data: ref })
+      .then((result) => {
+        if (result.status !== "paid") setOutcome("pendente");
+      })
+      .catch((error) => {
+        // O pagamento pode ter dado certo mesmo assim; o webhook confirma
+        // depois. Nao alarmar o convidado.
+        console.error("Falha ao confirmar pagamento no retorno:", error);
+      });
   }, []);
 
   if (!outcome) return null;
