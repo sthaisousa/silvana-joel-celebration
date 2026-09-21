@@ -4,7 +4,7 @@ import { deleteCookie, getCookie, getRequestHeader, setCookie } from "@tanstack/
 
 import { gifts as defaultGifts } from "@/components/wedding/Gifts";
 import { ensureGiftPurchasesTable, ensureRsvpPhoneColumn, getPool } from "@/lib/db";
-import { reconcilePurchase } from "./purchases";
+import { reconcilePurchase } from "@/lib/reconcile-purchase";
 
 const ADMIN_COOKIE = "wedding_admin";
 const LOGIN_ATTEMPT_LIMIT = 5;
