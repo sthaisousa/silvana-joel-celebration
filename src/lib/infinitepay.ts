@@ -14,6 +14,23 @@ export type CheckoutLinkPayload = {
   webhook_url: string;
   items: Array<{ quantity: number; price: number; description: string }>;
   customer: { name: string };
+  address: {
+    cep: string;
+    street: string;
+    neighborhood: string;
+    number: string;
+    complement: string;
+  };
+};
+
+// Local do casamento: ja vai preenchido para o convidado nao precisar digitar
+// um endereco no checkout.
+export const WEDDING_ADDRESS: CheckoutLinkPayload["address"] = {
+  cep: "79020220",
+  street: "Rua Manoel Inácio de Souza",
+  neighborhood: "Centro",
+  number: "507",
+  complement: "A",
 };
 
 export function buildCheckoutLinkPayload(input: {
@@ -40,6 +57,7 @@ export function buildCheckoutLinkPayload(input: {
       },
     ],
     customer: { name: input.buyerName },
+    address: WEDDING_ADDRESS,
   };
 }
 

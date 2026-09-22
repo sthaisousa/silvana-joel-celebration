@@ -63,6 +63,18 @@ test("envia o nome informado pelo convidado", () => {
   assert.equal(payload.customer.name, "Maria Souza");
 });
 
+test("preenche o endereco do casamento no checkout", () => {
+  const payload = buildCheckoutLinkPayload(linkInput);
+
+  assert.deepEqual(payload.address, {
+    cep: "79020220",
+    street: "Rua Manoel Inácio de Souza",
+    neighborhood: "Centro",
+    number: "507",
+    complement: "A",
+  });
+});
+
 test("nao considera pago quando a consulta nao encontra a transacao", () => {
   const result = parsePaymentCheck({ success: false }, 118700);
 
