@@ -387,9 +387,14 @@ function PixPaymentModal({
   gift: { id: number; title: string; price_cents: number };
   onClose: () => void;
 }) {
+  const [method, setMethod] = useState<"pix" | "card">("pix");
   const [copied, setCopied] = useState(false);
   const payload = createPixPayload(gift.price_cents);
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=${encodeURIComponent(payload)}`;
+  const formattedPrice = (gift.price_cents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 
   async function copyPixCode() {
     await navigator.clipboard.writeText(payload);
@@ -398,7 +403,7 @@ function PixPaymentModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-5 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-sm sm:p-5"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -408,76 +413,99 @@ function PixPaymentModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="pix-payment-title"
-        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto bg-background p-6 text-center shadow-2xl sm:p-8"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto bg-background p-5 text-center shadow-2xl sm:p-8"
       >
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar pagamento Pix"
+          aria-label="Fechar pagamento"
           className="absolute right-4 top-4 text-xl text-muted-foreground transition-colors hover:text-foreground"
         >
           ×
         </button>
         <p className="text-[10px] tracking-luxe uppercase text-primary">
-          Pagamento via Pix
+          Presentear
         </p>
-        <h2 id="pix-payment-title" className="mt-3 font-serif text-3xl">
+        <h2 id="pix-payment-title" className="mt-2 px-6 font-serif text-2xl sm:mt-3 sm:text-3xl">
           {gift.title}
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Valor:{" "}
-          {(gift.price_cents / 100).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          })}
-        </p>
-        <div className="mx-auto mt-6 w-fit border border-border bg-white p-3">
-          <img
-            src={qrCodeUrl}
-            alt="QR Code para pagamento via Pix"
-            width={240}
-            height={240}
-            className="h-60 w-60"
-          />
-        </div>
-        <p className="mt-5 text-sm text-muted-foreground">
-          Escaneie o QR Code no aplicativo do seu banco ou use o Pix copia e cola:
-        </p>
-        <textarea
-          readOnly
-          value={payload}
-          aria-label="Código Pix copia e cola"
-          rows={4}
-          onFocus={(event) => event.currentTarget.select()}
-          className="mt-3 w-full resize-none break-all border border-border bg-secondary/10 p-3 text-left font-mono text-[10px] leading-relaxed text-foreground outline-none focus:border-primary"
-        />
-        <p className="mt-3 text-xs text-muted-foreground">
-          Chave Pix: <span className="font-mono text-foreground">{PIX_KEY}</span>
-        </p>
-        <button
-          type="button"
-          onClick={copyPixCode}
-          className="mt-5 border border-primary px-5 py-3 text-[10px] tracking-luxe uppercase text-foreground transition-colors hover:bg-primary/10"
-        >
-          {copied ? "Pix copia e cola copiado" : "Copiar Pix copia e cola"}
-        </button>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Confirme o valor de{" "}
-          {(gift.price_cents / 100).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          })}{" "}
-          antes de concluir o pagamento.
+        <p className="mt-1 text-sm text-muted-foreground sm:mt-2">
+          Valor: {formattedPrice}
         </p>
 
-        <CardCheckout gift={gift} />
+        <div
+          role="tablist"
+          aria-label="Forma de pagamento"
+          className="mt-4 grid grid-cols-2 border border-primary sm:mt-6"
+        >
+          {(
+            [
+              { value: "pix", label: "Pix" },
+              { value: "card", label: "Cartão de crédito" },
+            ] as const
+          ).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={method === option.value}
+              onClick={() => setMethod(option.value)}
+              className={`px-3 py-3 text-[10px] tracking-luxe uppercase transition-colors ${
+                method === option.value
+                  ? "bg-primary text-primary-foreground"
+                  : "text-foreground hover:bg-primary/10"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {method === "pix" ? (
+          <div role="tabpanel">
+            <div className="mx-auto mt-5 w-fit border border-border bg-white p-2 sm:mt-6 sm:p-3">
+              <img
+                src={qrCodeUrl}
+                alt="QR Code para pagamento via Pix"
+                width={240}
+                height={240}
+                className="h-44 w-44 sm:h-60 sm:w-60"
+              />
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground sm:mt-5">
+              Escaneie o QR Code no aplicativo do seu banco ou use o Pix copia e cola:
+            </p>
+            <textarea
+              readOnly
+              value={payload}
+              aria-label="Código Pix copia e cola"
+              rows={3}
+              onFocus={(event) => event.currentTarget.select()}
+              className="mt-3 w-full resize-none break-all border border-border bg-secondary/10 p-3 text-left font-mono text-[10px] leading-relaxed text-foreground outline-none focus:border-primary"
+            />
+            <p className="mt-3 text-xs text-muted-foreground">
+              Chave Pix: <span className="font-mono text-foreground">{PIX_KEY}</span>
+            </p>
+            <button
+              type="button"
+              onClick={copyPixCode}
+              className="mt-5 border border-primary px-5 py-3 text-[10px] tracking-luxe uppercase text-foreground transition-colors hover:bg-primary/10"
+            >
+              {copied ? "Pix copia e cola copiado" : "Copiar Pix copia e cola"}
+            </button>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Confirme o valor de {formattedPrice} antes de concluir o pagamento.
+            </p>
+          </div>
+        ) : (
+          <CardCheckout gift={gift} />
+        )}
       </section>
     </div>
   );
 }
 
 function CardCheckout({ gift }: { gift: { id: number; title: string } }) {
-  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -501,23 +529,8 @@ function CardCheckout({ gift }: { gift: { id: number; title: string } }) {
     }
   }
 
-  if (!open) {
-    return (
-      <div className="mt-6 border-t border-border/70 pt-5">
-        <p className="text-xs text-muted-foreground">Prefere pagar no cartão?</p>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="mt-3 text-[10px] tracking-luxe uppercase text-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
-        >
-          Pagar com cartão de crédito
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={goToCheckout} className="mt-6 border-t border-border/70 pt-5 text-left">
+    <form role="tabpanel" onSubmit={goToCheckout} className="mt-6 text-left">
       <label
         htmlFor="card-buyer-name"
         className="text-[10px] tracking-luxe uppercase text-primary"
@@ -547,6 +560,9 @@ function CardCheckout({ gift }: { gift: { id: number; title: string } }) {
       >
         {submitting ? "Abrindo pagamento…" : "Continuar para o cartão"}
       </button>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Você será direcionado para um ambiente seguro de pagamento.
+      </p>
     </form>
   );
 }
